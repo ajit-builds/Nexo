@@ -10,30 +10,24 @@ import {
   Building2, 
   QrCode, 
   LogIn, 
-  LogOut, 
-  UserCircle2 
+  LogOut 
 } from "lucide-react";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
 
-  const role = user?.role?.toLowerCase();
-  const isIssuer = role === "issuer";
-  const isStudent = role === "student";
-  const isReviewer = role === "reviewer";
-
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/[0.06] transition-all">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-            <ShieldCheck className="w-5 h-5" />
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-xl bg-[#1d1d1f] flex items-center justify-center text-white shadow-sm transition group-hover:scale-105">
+            <ShieldCheck className="w-4 h-4" />
           </div>
-          <div>
-            <span className="text-xl font-black tracking-tight text-slate-900">NEXO</span>
-            <span className="text-[10px] font-bold tracking-widest text-indigo-600 uppercase block -mt-1">
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold tracking-tight text-[#1d1d1f]">NEXO</span>
+            <span className="text-[9px] font-medium tracking-wider text-[#86868b] uppercase -mt-0.5">
               Credential Network
             </span>
           </div>
@@ -41,94 +35,92 @@ export function Navbar() {
 
         {/* Role-Filtered Navigation */}
         <nav className="flex items-center gap-2">
-          {/* If Logged Out: Show Link to Sign In */}
           {!user && (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Portal Sign In</span>
-              </Link>
-            </div>
+            <Link
+              href="/login"
+              className="px-3.5 py-1.5 text-xs font-medium rounded-full text-[#1d1d1f] hover:bg-[#f5f5f7] transition"
+            >
+              Portals
+            </Link>
           )}
 
-          {/* When logged in as UNIVERSITY (ISSUER): ONLY Issuer Portal is displayed */}
-          {isIssuer && (
+          {/* When logged in as COLLEGE EMAIL: ONLY Issuer Portal is displayed */}
+          {user?.role === "issuer" && (
             <Link
               href="/university"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                pathname.startsWith("/university") || pathname.startsWith("/issuer")
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-full transition ${
+                pathname.startsWith("/university")
+                  ? "bg-[#1d1d1f] text-white shadow-sm"
+                  : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]"
               }`}
             >
-              <Building2 className="w-4 h-4" />
-              <span>🏛️ University Issuer Portal</span>
+              <Building2 className="w-3.5 h-3.5" />
+              <span>University Issuer</span>
             </Link>
           )}
 
-          {/* When logged in as STUDENT: ONLY Student Wallet is displayed */}
-          {isStudent && (
+          {/* When logged in as STUDENT EMAIL: ONLY Student Wallet is displayed */}
+          {user?.role === "student" && (
             <Link
               href="/student"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                pathname.startsWith("/student") || pathname.startsWith("/student-wallet")
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-full transition ${
+                pathname.startsWith("/student")
+                  ? "bg-[#1d1d1f] text-white shadow-sm"
+                  : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]"
               }`}
             >
-              <GraduationCap className="w-4 h-4" />
-              <span>🎓 Student In-App Wallet</span>
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>Student Wallet</span>
             </Link>
           )}
 
-          {/* When logged in as COMPANY (REVIEWER): ONLY Reviewer Portal is displayed */}
-          {isReviewer && (
+          {/* When logged in as COMPANY EMAIL: ONLY Reviewer Portal is displayed */}
+          {user?.role === "reviewer" && (
             <Link
               href="/verify"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                pathname.startsWith("/verify") || pathname.startsWith("/reviewer")
-                  ? "bg-emerald-600 text-white shadow-sm"
-                  : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-full transition ${
+                pathname.startsWith("/verify")
+                  ? "bg-[#1d1d1f] text-white shadow-sm"
+                  : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]"
               }`}
             >
-              <QrCode className="w-4 h-4" />
-              <span>🔍 Company Reviewer Portal</span>
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Recruiter Verifier</span>
             </Link>
           )}
 
           {/* User Profile / Auth State Controls */}
-          {user && (
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
+          {user ? (
+            <div className="flex items-center gap-2 pl-2 border-l border-black/[0.06] ml-1">
               <div className="hidden md:flex flex-col text-right">
-                <span className="text-xs font-bold text-slate-900 leading-tight flex items-center justify-end gap-1">
-                  <span>{user.name}</span>
+                <span className="text-xs font-medium text-[#1d1d1f] leading-tight">
+                  {user.name}
                 </span>
-                <span className="text-[10px] text-slate-500 truncate max-w-[150px]">
-                  {user.email}
+                <span className="text-[10px] text-[#86868b] truncate max-w-[130px]">
+                  {user.organization}
                 </span>
               </div>
 
-              <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                isIssuer
-                  ? "bg-blue-100 text-blue-800 border border-blue-200"
-                  : isStudent
-                  ? "bg-indigo-100 text-indigo-800 border border-indigo-200"
-                  : "bg-emerald-100 text-emerald-800 border border-emerald-200"
-              }`}>
-                {isIssuer ? "University" : isStudent ? "Student" : "Reviewer"}
+              <div className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#f5f5f7] text-[#1d1d1f] border border-black/[0.04]">
+                {user.role}
               </div>
 
               <button
                 onClick={logout}
                 title="Sign Out"
-                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                className="p-1.5 text-[#86868b] hover:text-[#ff3b30] hover:bg-[#f5f5f7] rounded-full transition"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1d1d1f] hover:bg-black text-white text-xs font-medium rounded-full transition shadow-sm ml-2"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </Link>
           )}
         </nav>
       </div>

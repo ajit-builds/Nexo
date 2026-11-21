@@ -6,15 +6,14 @@ import {
   Eye, 
   EyeOff, 
   Lock, 
-  CheckCircle, 
   Sparkles, 
   QrCode, 
-  ShieldAlert, 
   Clock, 
   Building
 } from 'lucide-react';
 import { NexoCredential, SelectiveDisclosureClaim, VerificationPresentationPayload } from '@/lib/types';
 import { getDisclosureOptions, createSelectivePresentation } from '@/lib/sd-jwt-helper';
+import { Slider } from '@/components/ui/Slider';
 
 interface SelectiveDisclosureModalProps {
   credential: NexoCredential | null;
@@ -75,37 +74,49 @@ export function SelectiveDisclosureModal({
   const disclosedCount = claims.filter((c) => c.disclosed).length;
   const redactedCount = claims.length - disclosedCount;
 
+  // Format validity for Apple Slider
+  const formatValidityDisplay = (mins: number) => {
+    if (mins < 60) return `${mins} mins`;
+    if (mins === 60) return '1 hour';
+    if (mins < 1440) {
+      const hrs = Math.round(mins / 60);
+      return `${hrs} hours`;
+    }
+    return '24 hours';
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-black/[0.06] overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-6 sm:p-7 border-b border-black/[0.06] flex items-center justify-between bg-[#fbfbfd]">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
-                <Sparkles className="w-5 h-5" />
+              <span className="p-1.5 rounded-xl bg-[#0071e3]/10 text-[#0071e3]">
+                <Sparkles className="w-4 h-4" />
               </span>
-              <h2 className="text-xl font-bold text-slate-900">Selective Disclosure Studio</h2>
+              <h2 className="text-xl font-bold text-[#1d1d1f] tracking-tight">Selective Disclosure Studio</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Select which attributes to reveal. Unchecked items remain completely redacted and mathematically masked.
+            <p className="text-xs text-[#86868b] mt-1">
+              Select which attributes to reveal. Unchecked items remain mathematically masked and tamper-proof.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition"
+            className="p-2 text-[#86868b] hover:text-[#1d1d1f] rounded-full hover:bg-[#f5f5f7] transition"
+            aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Scrollable Claims Body */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-6 sm:p-7 overflow-y-auto space-y-6">
           {/* Recruiter / Purpose Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-            <div>
-              <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mb-1.5">
-                <Building className="w-3.5 h-3.5 text-slate-500" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-[#f5f5f7] p-5 rounded-3xl border border-black/[0.04]">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#1d1d1f] flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-[#86868b]" />
                 Target Recruiter / Company
               </label>
               <input
@@ -113,45 +124,44 @@ export function SelectiveDisclosureModal({
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="e.g. Google India, Infosys HR"
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-[#d2d2d7]/60 rounded-xl focus:outline-none focus:border-[#0071e3] text-[#1d1d1f] transition"
               />
             </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mb-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-500" />
-                QR Code Validity
-              </label>
-              <select
+
+            {/* Apple Interactive Slider for QR Code Validity */}
+            <div className="space-y-1">
+              <Slider
+                min={15}
+                max={1440}
+                step={15}
                 value={validity}
-                onChange={(e) => setValidity(Number(e.target.value))}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
-              >
-                <option value={15}>15 Minutes (High Security)</option>
-                <option value={60}>1 Hour (Standard Interview)</option>
-                <option value={1440}>24 Hours (Day Pass)</option>
-                <option value={10080}>7 Days</option>
-              </select>
+                onChange={setValidity}
+                label="QR Code Validity"
+                valueDisplay={formatValidityDisplay}
+                minLabel="15m"
+                maxLabel="24h"
+              />
             </div>
           </div>
 
-          {/* Special Highlight: Predicate Claim (e.g. CGPA >= 8.0) */}
+          {/* Zero-Knowledge Predicate Claim Card */}
           {claims.find((c) => c.isPredicate) && (
-            <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4">
+            <div className="bg-[#0071e3]/5 border border-[#0071e3]/20 rounded-3xl p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-indigo-600 text-white rounded-xl mt-0.5">
+                  <div className="p-2 bg-[#0071e3] text-white rounded-xl mt-0.5 shadow-sm">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-indigo-950">
+                      <h4 className="text-sm font-bold text-[#1d1d1f]">
                         Zero-Knowledge Predicate: &quot;CGPA ≥ 8.0&quot;
                       </h4>
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-200/70 text-indigo-800 rounded-full">
+                      <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-[#0071e3]/10 text-[#0071e3] rounded-full">
                         Recommended
                       </span>
                     </div>
-                    <p className="text-xs text-indigo-800/80 mt-1">
+                    <p className="text-xs text-[#86868b] mt-1 leading-relaxed">
                       Proves you meet the minimum CGPA 8.0 requirement without disclosing your exact transcript or marks.
                     </p>
                   </div>
@@ -163,7 +173,7 @@ export function SelectiveDisclosureModal({
                     const pred = claims.find((c) => c.isPredicate);
                     if (pred) toggleClaim(pred.key);
                   }}
-                  className="w-5 h-5 accent-indigo-600 rounded cursor-pointer mt-1"
+                  className="w-5 h-5 accent-[#0071e3] rounded-md cursor-pointer mt-1"
                 />
               </div>
             </div>
@@ -171,40 +181,40 @@ export function SelectiveDisclosureModal({
 
           {/* List of Claims */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h3 className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
                 Credential Attributes ({disclosedCount} Revealed / {redactedCount} Hidden)
               </h3>
-              <span className="text-xs text-slate-500">Click checkboxes to toggle</span>
+              <span className="text-xs text-[#86868b]">Toggle to show / redact</span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {claims
                 .filter((c) => !c.isPredicate)
                 .map((claim) => (
                   <div
                     key={claim.key}
                     onClick={() => toggleClaim(claim.key)}
-                    className={`flex items-center justify-between p-3.5 rounded-xl border transition cursor-pointer select-none ${
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
                       claim.disclosed
-                        ? 'bg-white border-slate-200 hover:border-slate-300'
-                        : 'bg-slate-50/80 border-slate-200/60 opacity-60'
+                        ? 'bg-white border-[#d2d2d7]/70 shadow-sm'
+                        : 'bg-[#f5f5f7] border-black/[0.04] opacity-60'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-1.5 rounded-lg ${claim.disclosed ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-400'}`}>
+                      <div className={`p-2 rounded-xl ${claim.disclosed ? 'bg-[#34c759]/10 text-[#34c759]' : 'bg-[#e5e5ea] text-[#86868b]'}`}>
                         {claim.disclosed ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-800">{claim.label}</span>
+                          <span className="text-xs sm:text-sm font-semibold text-[#1d1d1f]">{claim.label}</span>
                           {!claim.disclosed && (
-                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded">
+                            <span className="text-[10px] font-semibold text-[#ff9500] bg-[#ff9500]/10 px-2 py-0.5 rounded-full">
                               Redacted
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 font-mono mt-0.5">
+                        <p className="text-xs text-[#86868b] font-mono mt-0.5">
                           {claim.disclosed ? String(claim.value) : '•••••••••••• (Hidden from verifier)'}
                         </p>
                       </div>
@@ -214,7 +224,7 @@ export function SelectiveDisclosureModal({
                       type="checkbox"
                       checked={claim.disclosed}
                       onChange={() => {}} // handled by parent onClick
-                      className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                      className="w-4 h-4 accent-[#0071e3] rounded cursor-pointer"
                     />
                   </div>
                 ))}
@@ -222,26 +232,26 @@ export function SelectiveDisclosureModal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 flex items-center gap-1.5">
-            <Lock className="w-4 h-4 text-emerald-600" />
+        {/* Footer - Apple Pill Buttons */}
+        <div className="p-6 border-t border-black/[0.06] bg-[#fbfbfd] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs text-[#86868b] flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-[#34c759]" />
             <span>Digital signature & Merkle proof automatically attached.</span>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={onClose}
-              className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition"
+              className="px-5 py-2.5 text-xs font-medium text-[#1d1d1f] hover:bg-[#f5f5f7] rounded-full transition"
             >
               Cancel
             </button>
             <button
               onClick={handleGenerate}
               disabled={isGenerating || disclosedCount === 0}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition shadow-sm disabled:opacity-50"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0071e3] hover:bg-[#0077ed] active:scale-[0.98] text-white font-medium text-xs rounded-full transition shadow-[0_2px_8px_rgba(0,113,227,0.25)] disabled:opacity-40"
             >
-              <QrCode className="w-4 h-4" />
+              <QrCode className="w-3.5 h-3.5" />
               <span>{isGenerating ? 'Generating...' : 'Generate Verification QR'}</span>
             </button>
           </div>

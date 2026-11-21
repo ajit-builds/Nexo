@@ -37,7 +37,6 @@ function LoginForm() {
   const { login, register, quickLoginPreset } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams.get("redirect");
 
   // Real-time domain validation as user types
   const domainValidation = useMemo(() => {
@@ -73,7 +72,6 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        // Redirect to authorized portal or requested redirect if authorized
         const target = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
         router.push(target);
       } else {
@@ -108,35 +106,34 @@ function LoginForm() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 sm:py-16">
+    <div className="max-w-5xl mx-auto px-4 py-12 sm:py-20 space-y-12">
       {/* Top Heading */}
-      <div className="text-center max-w-xl mx-auto space-y-3 mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-700">
-          <ShieldCheck className="w-4 h-4 text-indigo-600" />
+      <div className="text-center max-w-xl mx-auto space-y-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0071e3]/10 text-xs font-semibold text-[#0071e3]">
+          <ShieldCheck className="w-3.5 h-3.5" />
           <span>Domain-Based Role Authentication</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#1d1d1f] tracking-tight">
           Nexo Identity & Portal Sign In
         </h1>
-        <p className="text-sm text-slate-600">
-          Sign in using your institutional email. The platform automatically determines your role and grants access exclusively to your authorized portal:
-          <strong> University Domain</strong> &rarr; Issuer Portal, <strong>@college.isu.ac.in</strong> &rarr; Student Wallet, <strong>Company Domain</strong> &rarr; Reviewer Portal.
+        <p className="text-xs sm:text-sm text-[#86868b] leading-relaxed">
+          Sign in using your institutional email. The platform automatically determines your role and grants access exclusively to your authorized portal.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Common Auth Form */}
-        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-lg space-y-6">
-          {/* Mode Switcher */}
-          <div className="flex p-1 bg-slate-100 rounded-2xl">
+        <div className="lg:col-span-7 bg-white border border-black/[0.06] rounded-3xl p-8 sm:p-10 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-6">
+          {/* Mode Switcher - Apple Segmented Control */}
+          <div className="flex p-1 bg-[#f5f5f7] rounded-full border border-black/[0.04]">
             <button
               type="button"
               onClick={() => {
                 setMode("login");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition ${
-                mode === "login" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+              className={`flex-1 py-2 text-xs font-medium rounded-full transition-all duration-200 ${
+                mode === "login" ? "bg-white text-[#1d1d1f] shadow-[0_2px_8px_rgba(0,0,0,0.06)]" : "text-[#86868b] hover:text-[#1d1d1f]"
               }`}
             >
               Sign In to Existing Account
@@ -147,8 +144,8 @@ function LoginForm() {
                 setMode("register");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition ${
-                mode === "register" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+              className={`flex-1 py-2 text-xs font-medium rounded-full transition-all duration-200 ${
+                mode === "register" ? "bg-white text-[#1d1d1f] shadow-[0_2px_8px_rgba(0,0,0,0.06)]" : "text-[#86868b] hover:text-[#1d1d1f]"
               }`}
             >
               Register Approved Account
@@ -157,10 +154,10 @@ function LoginForm() {
 
           {/* Error Alert Box */}
           {errorMessage && (
-            <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs flex items-start gap-3 animate-in fade-in">
-              <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <span className="font-bold block">Authentication Notice</span>
+            <div className="p-4 rounded-2xl bg-[#ff3b30]/10 border border-[#ff3b30]/20 text-[#ff3b30] text-xs flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <span className="font-semibold block">Authentication Notice</span>
                 <p className="leading-relaxed">{errorMessage}</p>
               </div>
             </div>
@@ -168,28 +165,28 @@ function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Full Name</label>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-[#1d1d1f]">Full Name</label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <User className="w-4 h-4 text-[#86868b] absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     required
                     placeholder="e.g. Dr. Rajesh Kumar or Aarav Sharma"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#f5f5f7] border border-[#d2d2d7]/50 rounded-2xl text-xs text-[#1d1d1f] focus:bg-white focus:outline-none focus:border-[#0071e3] transition"
                   />
                 </div>
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-[#1d1d1f]">
                 Official Registered Email Address
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Mail className="w-4 h-4 text-[#86868b] absolute left-3.5 top-3.5" />
                 <input
                   type="email"
                   required
@@ -199,7 +196,7 @@ function LoginForm() {
                     setEmail(e.target.value);
                     if (errorMessage) setErrorMessage(null);
                   }}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 font-mono text-xs"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#f5f5f7] border border-[#d2d2d7]/50 rounded-2xl text-xs font-mono text-[#1d1d1f] focus:bg-white focus:outline-none focus:border-[#0071e3] transition"
                 />
               </div>
 
@@ -207,42 +204,36 @@ function LoginForm() {
               {domainValidation && (
                 <div className="mt-3">
                   {domainValidation.valid ? (
-                    <div className={`p-3.5 rounded-2xl border text-xs flex items-center gap-3 transition-all ${
-                      domainValidation.role === "issuer"
-                        ? "bg-blue-50/90 border-blue-200 text-blue-900"
-                        : domainValidation.role === "student"
-                        ? "bg-indigo-50/90 border-indigo-200 text-indigo-900"
-                        : "bg-emerald-50/90 border-emerald-200 text-emerald-900"
-                    }`}>
+                    <div className="p-3.5 rounded-2xl border border-black/[0.04] bg-[#f5f5f7] text-xs flex items-center gap-3">
                       <span className="text-xl">
                         {domainValidation.role === "issuer" ? "🏛️" : domainValidation.role === "student" ? "🎓" : "🔍"}
                       </span>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-black">
+                          <span className="font-semibold text-[#1d1d1f]">
                             {domainValidation.role === "issuer"
                               ? "University Issuer Domain Approved"
                               : domainValidation.role === "student"
                               ? "Designated Student Domain Approved"
                               : "Company Reviewer Domain Approved"}
                           </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/70 uppercase">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-black/[0.06] uppercase text-[#1d1d1f]">
                             {domainValidation.role}
                           </span>
                         </div>
-                        <span className="text-[11px] opacity-85 block mt-0.5">
-                          Organization: <strong>{domainValidation.organizationName}</strong> &bull; Authorized Portal:{" "}
-                          <strong>{ROLE_PORTALS[domainValidation.role].canonical}</strong>
+                        <span className="text-[11px] text-[#86868b] block mt-0.5">
+                          Organization: <strong className="text-[#1d1d1f]">{domainValidation.organizationName}</strong> &bull; Portal:{" "}
+                          <strong className="text-[#0071e3]">{ROLE_PORTALS[domainValidation.role].canonical}</strong>
                         </span>
                       </div>
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-[#34c759] shrink-0" />
                     </div>
                   ) : (
-                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
-                      <XCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="p-3.5 rounded-2xl bg-[#ff9500]/10 border border-[#ff9500]/20 text-xs flex items-start gap-2.5">
+                      <XCircle className="w-4 h-4 text-[#ff9500] shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-bold block">Unapproved Email Domain</span>
-                        <p className="text-[11px] text-amber-800 leading-relaxed mt-0.5">
+                        <span className="font-semibold text-[#1d1d1f] block">Unapproved Email Domain</span>
+                        <p className="text-[11px] text-[#86868b] leading-relaxed mt-0.5">
                           {UNREGISTERED_DOMAIN_ERROR}
                         </p>
                       </div>
@@ -252,10 +243,10 @@ function LoginForm() {
               )}
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Password</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-[#1d1d1f]">Password</label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-[#86868b] absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   required
@@ -265,16 +256,16 @@ function LoginForm() {
                     setPassword(e.target.value);
                     if (errorMessage) setErrorMessage(null);
                   }}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#f5f5f7] border border-[#d2d2d7]/50 rounded-2xl text-xs text-[#1d1d1f] focus:bg-white focus:outline-none focus:border-[#0071e3] transition"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Default demo password for seeded accounts: <code>Password@123</code></p>
+              <p className="text-[11px] text-[#86868b]">Demo password: <code className="bg-[#f5f5f7] px-1.5 py-0.5 rounded text-[#1d1d1f]">Password@123</code></p>
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-sm rounded-xl transition shadow-md"
+              className="w-full mt-2 flex items-center justify-center gap-2 py-3 bg-[#0071e3] hover:bg-[#0077ed] active:scale-[0.98] disabled:opacity-50 text-white font-medium text-xs rounded-full transition shadow-[0_2px_8px_rgba(0,113,227,0.25)]"
             >
               {submitting ? (
                 <>
@@ -284,28 +275,28 @@ function LoginForm() {
               ) : (
                 <>
                   <span>{mode === "login" ? "Sign In & Open Authorized Portal" : "Register & Open Portal"}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
             </button>
           </form>
 
           {/* Security guarantee note */}
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
-            <span>Strict server-side RBAC active: Access to portals outside your domain is rejected with HTTP 403.</span>
+          <div className="p-3.5 bg-[#f5f5f7] border border-black/[0.04] rounded-2xl text-[11px] text-[#86868b] flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#0071e3] shrink-0" />
+            <span>Strict server-side RBAC: Access to portals outside your domain is rejected with HTTP 403.</span>
           </div>
         </div>
 
-        {/* Right Column: 1-Click Approved Test Personas */}
+        {/* Right Column: 1-Click Approved Test Personas - Clean Apple Solid Card (No Gradients) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 shadow-lg space-y-3">
-            <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-indigo-400" /> Authorized Role Personas
+          <div className="bg-[#1d1d1f] text-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.08)] space-y-3">
+            <div className="flex items-center gap-2 text-[#2997ff] font-semibold text-xs uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" /> Authorized Role Personas
             </div>
-            <h3 className="text-xl font-black">Pre-Approved Test Accounts</h3>
-            <p className="text-xs text-indigo-200 leading-relaxed">
-              Click any of the three pre-seeded accounts to log in with an authorized domain and verify that portal routing and backend protections are enforced.
+            <h3 className="text-xl font-bold tracking-tight text-white">Pre-Approved Test Accounts</h3>
+            <p className="text-xs text-[#86868b] leading-relaxed">
+              Click any of the three pre-seeded accounts to log in with an authorized domain and verify portal routing and backend protections.
             </p>
           </div>
 
@@ -314,24 +305,18 @@ function LoginForm() {
             type="button"
             disabled={submitting}
             onClick={() => handleSelectPreset("issuer")}
-            className="w-full text-left p-5 bg-white border border-slate-200 hover:border-blue-400 rounded-2xl shadow-sm hover:shadow-md transition group space-y-2"
+            className="w-full text-left p-5 bg-white border border-black/[0.06] hover:border-[#0071e3]/40 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 group space-y-2"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <Building2 className="w-3.5 h-3.5" /> University (Issuer)
+              <span className="text-[11px] font-semibold text-[#0071e3] bg-[#0071e3]/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <Building2 className="w-3 h-3" /> University Issuer
               </span>
-              <span className="text-xs font-bold text-blue-600 flex items-center gap-1 group-hover:translate-x-0.5 transition">
-                Sign In <ArrowRight className="w-3.5 h-3.5" />
+              <span className="text-xs text-[#86868b] group-hover:text-[#0071e3] font-medium transition">
+                One-Click Sign In &rarr;
               </span>
             </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">Dr. S. K. Mukherjee</h4>
-              <p className="text-xs font-mono text-slate-600">admin@university.edu.in</p>
-            </div>
-            <div className="text-[11px] text-slate-600 pt-1.5 border-t border-slate-100 flex items-center justify-between">
-              <span>Domain: <code>university.edu.in</code></span>
-              <strong className="text-blue-700">&rarr; /university ONLY</strong>
-            </div>
+            <div className="text-sm font-bold text-[#1d1d1f]">Dr. Ramesh Rao (Registrar)</div>
+            <p className="text-xs font-mono text-[#86868b]">admin@university.edu.in</p>
           </button>
 
           {/* Preset 2: Student */}
@@ -339,49 +324,37 @@ function LoginForm() {
             type="button"
             disabled={submitting}
             onClick={() => handleSelectPreset("student")}
-            className="w-full text-left p-5 bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl shadow-sm hover:shadow-md transition group space-y-2"
+            className="w-full text-left p-5 bg-white border border-black/[0.06] hover:border-[#0071e3]/40 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 group space-y-2"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <GraduationCap className="w-3.5 h-3.5" /> Student (Credential Holder)
+              <span className="text-[11px] font-semibold text-[#5856d6] bg-[#5856d6]/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <GraduationCap className="w-3 h-3" /> Student Candidate
               </span>
-              <span className="text-xs font-bold text-indigo-600 flex items-center gap-1 group-hover:translate-x-0.5 transition">
-                Sign In <ArrowRight className="w-3.5 h-3.5" />
+              <span className="text-xs text-[#86868b] group-hover:text-[#5856d6] font-medium transition">
+                One-Click Sign In &rarr;
               </span>
             </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">Aarav Sharma</h4>
-              <p className="text-xs font-mono text-slate-600">student@college.isu.ac.in</p>
-            </div>
-            <div className="text-[11px] text-slate-600 pt-1.5 border-t border-slate-100 flex items-center justify-between">
-              <span>Designated Domain: <code>college.isu.ac.in</code></span>
-              <strong className="text-indigo-700">&rarr; /student ONLY</strong>
-            </div>
+            <div className="text-sm font-bold text-[#1d1d1f]">Aarav Sharma (B.Tech CSE)</div>
+            <p className="text-xs font-mono text-[#86868b]">student@college.isu.ac.in</p>
           </button>
 
-          {/* Preset 3: Company Reviewer */}
+          {/* Preset 3: Recruiter */}
           <button
             type="button"
             disabled={submitting}
             onClick={() => handleSelectPreset("reviewer")}
-            className="w-full text-left p-5 bg-white border border-slate-200 hover:border-emerald-400 rounded-2xl shadow-sm hover:shadow-md transition group space-y-2"
+            className="w-full text-left p-5 bg-white border border-black/[0.06] hover:border-[#0071e3]/40 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 group space-y-2"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <QrCode className="w-3.5 h-3.5" /> Company (Reviewer)
+              <span className="text-[11px] font-semibold text-[#34c759] bg-[#34c759]/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <QrCode className="w-3 h-3" /> Hiring Recruiter
               </span>
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 group-hover:translate-x-0.5 transition">
-                Sign In <ArrowRight className="w-3.5 h-3.5" />
+              <span className="text-xs text-[#86868b] group-hover:text-[#34c759] font-medium transition">
+                One-Click Sign In &rarr;
               </span>
             </div>
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">Sarah Jenkins</h4>
-              <p className="text-xs font-mono text-slate-600">hr@company.com</p>
-            </div>
-            <div className="text-[11px] text-slate-600 pt-1.5 border-t border-slate-100 flex items-center justify-between">
-              <span>Domain: <code>company.com</code></span>
-              <strong className="text-emerald-700">&rarr; /verify ONLY</strong>
-            </div>
+            <div className="text-sm font-bold text-[#1d1d1f]">Priya Nair (Lead Technical Recruiter)</div>
+            <p className="text-xs font-mono text-[#86868b]">recruiter@company.com</p>
           </button>
         </div>
       </div>
@@ -391,7 +364,11 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center text-sm text-slate-500">Loading Login...</div>}>
+    <Suspense fallback={
+      <div className="max-w-5xl mx-auto px-4 py-16 text-center text-xs text-[#86868b]">
+        Loading sign in portal...
+      </div>
+    }>
       <LoginForm />
     </Suspense>
   );
