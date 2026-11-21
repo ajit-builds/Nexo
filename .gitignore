@@ -20,25 +20,16 @@
 
 # Env files (NEVER commit secrets!)
 .env
+.env*
+*.env
+*.env.*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS / Editor
-.DS_Store
-*.pem
-.vscode
-.idea
-
-
-# Prisma SQLite database (never commit)
-prisma/dev.db
-prisma/dev.db-journal
-prisma/*.db
-prisma/*.db-journal
+# SQLite database files (never commit)
+*.db
+*.db-journal
+prisma/**/*.db
+prisma/**/*.db-journal
