@@ -17,10 +17,9 @@ import { NexoCredential } from '@/lib/types';
 interface CredentialCardProps {
   credential: NexoCredential;
   onShare: (credential: NexoCredential) => void;
-  onQuickQR?: (credential: NexoCredential) => void;
 }
 
-export function CredentialCard({ credential, onShare, onQuickQR }: CredentialCardProps) {
+export function CredentialCard({ credential, onShare }: CredentialCardProps) {
   const isAcademic = credential.type === 'academic';
   const claims = credential.claims;
 
@@ -119,19 +118,13 @@ export function CredentialCard({ credential, onShare, onQuickQR }: CredentialCar
       </div>
 
       {/* Footer Actions */}
-      <div className="p-6 pt-0 grid grid-cols-2 gap-2.5">
-        <button
-          onClick={() => (onQuickQR ? onQuickQR(credential) : onShare(credential))}
-          className="flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2.5 px-3 rounded-xl transition shadow-sm"
-        >
-          <Share2 className="w-3.5 h-3.5" />
-          <span>Auto QR Code</span>
-        </button>
+      <div className="p-6 pt-0">
         <button
           onClick={() => onShare(credential)}
-          className="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs py-2.5 px-3 rounded-xl transition border border-slate-200"
+          className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition duration-150 shadow-sm text-sm"
         >
-          <span>Selective Privacy</span>
+          <Share2 className="w-4 h-4" />
+          <span>Share with Selective Disclosure</span>
         </button>
       </div>
     </div>

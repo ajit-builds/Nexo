@@ -87,32 +87,6 @@ export default function StudentWalletPage() {
     fetchCredentialsFromApi(newId);
   };
 
-  // Instant 1-click Auto QR Generator for any credential
-  const handleQuickQR = async (credential: NexoCredential) => {
-    try {
-      const disclosureOptions = getDisclosureOptions(credential);
-      const optionsWithPredicate = disclosureOptions.map((opt) => {
-        if (opt.key === 'cgpa_above_8') return { ...opt, disclosed: true };
-        if (opt.key === 'cgpa') return { ...opt, disclosed: false }; // masked for privacy
-        if (opt.key === 'student_id') return { ...opt, disclosed: false }; // masked for privacy
-        return opt;
-      });
-
-      const autoPresentation = await createSelectivePresentation(
-        credential,
-        optionsWithPredicate,
-        wallet?.address || '',
-        privateKey,
-        'Recruiter Quick Verification',
-        60
-      );
-
-      setPresentationPayload(autoPresentation);
-    } catch (err) {
-      console.error('Quick QR generation error:', err);
-    }
-  };
-
   const filteredCredentials = credentials.filter((c) => {
     if (activeTab === 'academic') return c.type === 'academic';
     if (activeTab === 'experience') return c.type === 'experience';
@@ -211,7 +185,6 @@ export default function StudentWalletPage() {
             key={cred.id}
             credential={cred}
             onShare={(credential) => setSelectedForShare(credential)}
-            onQuickQR={handleQuickQR}
           />
         ))}
       </div>
