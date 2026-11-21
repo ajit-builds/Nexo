@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { VerificationPresentationPayload } from '@/lib/types';
 import { QRScanner } from '@/components/QRScanner';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 function VerifierContent() {
   const router = useRouter();
