@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased selection:bg-indigo-500 selection:text-white bg-slate-50 min-h-screen">
+      <body className="antialiased selection:bg-[#0071e3] selection:text-white bg-[#f5f5f7] text-[#1d1d1f] min-h-screen">
         <AuthProvider>
           <Navbar />
           <main className="min-h-[calc(100vh-4rem)]">{children}</main>

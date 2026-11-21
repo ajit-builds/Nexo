@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { VerificationPresentationPayload, ConsentLogEntry } from '@/lib/types';
 import { generatePresentationQRCode, saveConsentLog } from '@/lib/sd-jwt-helper';
+import { copyToClipboard } from '@/lib/clipboard';
 
 interface QRCodeModalProps {
   payload: VerificationPresentationPayload | null;
@@ -57,17 +58,21 @@ export function QRCodeModal({ payload, isOpen, onClose, onConsentLogged }: QRCod
 
   if (!isOpen || !payload) return null;
 
-  const copyLink = () => {
+  const copyLink = async () => {
     if (!verificationUrl) return;
-    navigator.clipboard.writeText(verificationUrl);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+    const ok = await copyToClipboard(verificationUrl);
+    if (ok) {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
   };
 
-  const copyJson = () => {
-    navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyJson = async () => {
+    const ok = await copyToClipboard(JSON.stringify(payload, null, 2));
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const downloadQR = () => {

@@ -1,0 +1,87 @@
+// Nexo Credential Network — Prisma Schema
+// SQLite for local dev, switch DATABASE_URL to PostgreSQL for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── 1. Presentations (SD-JWT QR presentations shared by students) ───────────
+model Presentation {
+  id               String   @id  // presentationId (UUID)
+  credentialId     String
+  credentialType   String   // "academic" | "experience"
+  issuerName       String
+  issuerAddress    String
+  batchId          String
+  merkleRoot       String
+  credentialHash   String
+  disclosedClaims  String   // JSON blob
+  redactedKeys     String   // JSON array
+  holderAddress    String
+  holderSignature  String?
+  purpose          String
+  nonce            String
+  issuedAt         DateTime
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  verifications    Verification[]
+}
+
+// ─── 2. Verification Events (every time a recruiter verifies a credential) ───
+model Verification {
+  id               String       @id @default(cuid())
+  presentationId   String
+  presentation     Presentation @relation(fields: [presentationId], references: [id])
+  verifierIp       String?
+  result           String       // "passed" | "failed" | "revoked"
+  latencyMs        Int?
+  timestamp        DateTime     @default(now())
+}
+
+// ─── 3. DPDP Consent Logs (every time a student shares with a recruiter) ─────
+model ConsentLog {
+  id               String   @id @default(cuid())
+  holderAddress    String
+  recipient        String   // recruiter name / org
+  purpose          String
+  credentialTitle  String
+  disclosedClaims  String   // JSON array
+  redactedClaims   String   // JSON array
+  status           String   @default("active") // "active" | "revoked" | "expired"
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ─── 4. Anchored Batches (issued by university via BulkIssuance) ─────────────
+model Batch {
+  id               String   @id @default(cuid())
+  batchId          String   @unique
+  merkleRoot       String
+  issuerAddress    String
+  issuerName       String
+  credentialType   String   // "Degree" | "ExperienceLetter"
+  totalCredentials Int
+  txHash           String
+  ipfsUri          String   @default("")
+  timestamp        DateTime @default(now())
+  createdAt        DateTime @default(now())
+}
+
+// ─── 5. Revocations (on-chain revocation mirrored for fast lookup) ────────────
+model Revocation {
+  id               String   @id @default(cuid())
+  credentialHash   String   @unique
+  credentialId     String
+  studentName      String
+  degree           String
+  revokedBy        String
+  reason           String
+  txHash           String
+  timestamp        DateTime @default(now())
+}

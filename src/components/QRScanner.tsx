@@ -9,7 +9,7 @@ interface QRScannerProps {
 }
 
 export function QRScanner({ onScan, isOpen = true }: QRScannerProps) {
-  const [scanMode, setScanMode] = useState<"camera" | "upload">("camera");
+  const [scanMode, setScanMode] = useState<"camera" | "upload">("upload");
   const scannerRef = useRef<any>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);

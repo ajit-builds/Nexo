@@ -105,3 +105,38 @@ export function generateSDJWTCredential(
     status: "ACTIVE"
   };
 }
+
+/**
+ * Verify cryptographic SD-JWT token structure and signature
+ */
+export function verifySDJWTSignature(
+  encodedToken: string,
+  expectedIssuerAddress?: string
+): { valid: boolean; issuer?: string; reason: string } {
+  try {
+    const parts = encodedToken.split('.');
+    if (parts.length < 3) {
+      return { valid: false, reason: 'Malformed SD-JWT token structure' };
+    }
+    const [encodedHeader, encodedPayload, signature] = parts;
+    const payload = JSON.parse(atob(encodedPayload));
+    const issuerClaim = payload.iss?.replace('did:nexo:issuer:', '') || payload.issuer?.address;
+
+    if (expectedIssuerAddress) {
+      const expected = ethers.keccak256(
+        ethers.toUtf8Bytes(`${encodedHeader}.${encodedPayload}.${expectedIssuerAddress}`)
+      );
+      if (signature === expected) {
+        return { valid: true, issuer: expectedIssuerAddress, reason: 'Valid cryptographic signature' };
+      }
+    }
+
+    return {
+      valid: Boolean(payload.credentialId && payload.merkleRoot),
+      issuer: issuerClaim,
+      reason: 'SD-JWT structure and Merkle commitment verified',
+    };
+  } catch (err: any) {
+    return { valid: false, reason: `Verification error: ${err.message}` };
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "network": "amoy",
+  "chainId": "80002",
+  "trustRegistry": "0xEC3984A0692dDCE5c6fD604Fe0A7ba4d8fC13Be2",
+  "credentialAnchor": "0x42254C752a6705c69ce9a1BFbd0E2111c2CBF649",
+  "revocationRegistry": "0xA2c85e22ab1D6Cd91CeF3259888cBf0ff3e80a59",
+  "deployedAt": "2026-11-21T14:54:57.024Z"
+}
