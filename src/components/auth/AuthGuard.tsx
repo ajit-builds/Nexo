@@ -1,20 +1,47 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { UserRole } from "@/lib/auth";
-import { ShieldAlert, ArrowLeft, LogIn, Lock, Building2, GraduationCap, QrCode } from "lucide-react";
+import { AppRole, ROLE_PORTALS } from "@/lib/domain-registry";
+import { ShieldAlert, ArrowRight, LogIn, Lock, Building2, GraduationCap, QrCode } from "lucide-react";
 
 interface Props {
-  allowedRole: UserRole;
+  allowedRole: AppRole | "issuer" | "student" | "reviewer" | "ISSUER" | "STUDENT" | "RECRUITER";
   children: React.ReactNode;
+}
+
+function normalizeRole(roleStr: string): AppRole {
+  const lower = roleStr.toLowerCase();
+  if (lower === "issuer") return "issuer";
+  if (lower === "student") return "student";
+  return "reviewer";
 }
 
 export function AuthGuard({ allowedRole, children }: Props) {
   const { user, isLoading, quickLoginPreset } = useAuth();
   const router = useRouter();
+  const [countdown, setCountdown] = useState(5);
+
+  const targetRole = normalizeRole(allowedRole);
+  const currentRole = user ? normalizeRole(user.role) : null;
+  const isAuthorized = currentRole === targetRole;
+  const authorizedDashboard = user ? (user.portalPath || ROLE_PORTALS[currentRole || "student"].canonical) : "/login";
+
+  // Automatic redirect countdown on 403
+  useEffect(() => {
+    if (user && !isAuthorized) {
+      if (countdown <= 0) {
+        router.push(authorizedDashboard);
+        return;
+      }
+      const timer = setTimeout(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, isAuthorized, countdown, authorizedDashboard, router]);
 
   if (isLoading) {
     return (
@@ -24,7 +51,7 @@ export function AuthGuard({ allowedRole, children }: Props) {
     );
   }
 
-  // Case 1: Not logged in
+  // Case 1: Unauthenticated
   if (!user) {
     return (
       <div className="max-w-lg mx-auto my-16 p-8 bg-white border border-slate-200 rounded-3xl shadow-xl text-center space-y-6">
@@ -37,25 +64,25 @@ export function AuthGuard({ allowedRole, children }: Props) {
           </span>
           <h2 className="text-2xl font-black text-slate-900">Sign in to Access this Portal</h2>
           <p className="text-sm text-slate-500 max-w-sm mx-auto">
-            This screen is protected by Nexo Role-Based Access Control. Please sign in with your authorized email.
+            This portal is strictly protected by Nexo Role-Based Access Control. Please sign in with your authorized email domain.
           </p>
         </div>
 
         <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-left space-y-2 text-xs">
-          <span className="font-bold text-slate-700 block">Required Authorization:</span>
-          {allowedRole === "ISSUER" && (
+          <span className="font-bold text-slate-700 block">Required Domain Authorization:</span>
+          {targetRole === "issuer" && (
             <p className="text-blue-700 flex items-center gap-1.5 font-medium">
-              <Building2 className="w-4 h-4 shrink-0" /> College / University Institutional Email (@*.ac.in / @*.edu)
+              <Building2 className="w-4 h-4 shrink-0" /> Approved University Domain (e.g. <code>@university.edu.in</code>)
             </p>
           )}
-          {allowedRole === "STUDENT" && (
+          {targetRole === "student" && (
             <p className="text-indigo-700 flex items-center gap-1.5 font-medium">
-              <GraduationCap className="w-4 h-4 shrink-0" /> Student / Alumni Email (@student.* / student ID)
+              <GraduationCap className="w-4 h-4 shrink-0" /> Designated Student Domain (<code>@college.isu.ac.in</code>)
             </p>
           )}
-          {allowedRole === "RECRUITER" && (
+          {targetRole === "reviewer" && (
             <p className="text-emerald-700 flex items-center gap-1.5 font-medium">
-              <QrCode className="w-4 h-4 shrink-0" /> Company Corporate Email (@google.com / corporate domain)
+              <QrCode className="w-4 h-4 shrink-0" /> Approved Company Domain (e.g. <code>@company.com</code>)
             </p>
           )}
         </div>
@@ -68,61 +95,66 @@ export function AuthGuard({ allowedRole, children }: Props) {
             <LogIn className="w-4 h-4" /> Go to Login Screen
           </Link>
           <button
-            onClick={() => quickLoginPreset(allowedRole)}
+            onClick={() => quickLoginPreset(targetRole)}
             className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition"
           >
-            ⚡ Quick Demo Sign In as {allowedRole === "ISSUER" ? "College Admin" : allowedRole === "STUDENT" ? "Student" : "Reviewer"}
+            ⚡ Quick Demo Sign In as {targetRole === "issuer" ? "University Issuer" : targetRole === "student" ? "Student" : "Reviewer"}
           </button>
         </div>
       </div>
     );
   }
 
-  // Case 2: Role mismatch (e.g. Student trying to view Issuer Portal)
-  if (user.role !== allowedRole) {
-    const roleLabels = {
-      ISSUER: { name: "College / University Admin", path: "/university", icon: "🏛️" },
-      STUDENT: { name: "Student / Holder", path: "/student", icon: "🎓" },
-      RECRUITER: { name: "Company Reviewer", path: "/verify", icon: "🔍" }
+  // Case 2: 403 – Unauthorized Access (Role Mismatch)
+  if (!isAuthorized) {
+    const roleLabels: Record<AppRole, { name: string; path: string; icon: string }> = {
+      issuer: { name: "University Issuer Portal", path: "/university", icon: "🏛️" },
+      student: { name: "Student In-App Wallet", path: "/student", icon: "🎓" },
+      reviewer: { name: "Company Reviewer Portal", path: "/verify", icon: "🔍" },
     };
 
-    const target = roleLabels[user.role];
+    const userTarget = roleLabels[currentRole || "student"];
 
     return (
-      <div className="max-w-xl mx-auto my-16 p-8 bg-white border border-red-200 rounded-3xl shadow-xl text-center space-y-6">
+      <div className="max-w-xl mx-auto my-16 p-8 bg-white border-2 border-red-200 rounded-3xl shadow-xl text-center space-y-6">
         <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 mx-auto">
           <ShieldAlert className="w-8 h-8" />
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 border border-red-200 px-3 py-1 rounded-full">
-            Role Authorization Mismatch
+          <span className="text-xs font-black uppercase tracking-wider text-red-700 bg-red-100 border border-red-200 px-3 py-1 rounded-full">
+            HTTP 403 &bull; Unauthorized Access
           </span>
-          <h2 className="text-2xl font-black text-slate-900">Access Restricted</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">403 &ndash; Unauthorized Access</h2>
           <p className="text-sm text-slate-600 max-w-md mx-auto">
-            You are logged in with <strong className="text-slate-900">{user.email}</strong> as{" "}
-            <span className="font-bold text-indigo-600">{user.roleTitle} ({user.role})</span>.
+            You are authenticated as <strong className="text-slate-900">{user.email}</strong> with role{" "}
+            <span className="font-bold text-indigo-600 capitalize">[{user.role}]</span>.
           </p>
-          <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            {allowedRole === "ISSUER" && "Only authorized College / University emails can access the Issuer Portal to mint and revoke credentials."}
-            {allowedRole === "STUDENT" && "Only registered Student accounts can access the personal student wallet."}
-            {allowedRole === "RECRUITER" && "Only corporate Company Reviewer emails can access the Recruiter Verifier portal."}
-          </p>
+          <div className="p-4 bg-red-50/60 rounded-2xl border border-red-200 text-xs text-red-900 text-left space-y-1.5">
+            <span className="font-bold block">Access Restriction Enforcement:</span>
+            <p>
+              Your account domain is restricted to the <strong>{userTarget.name}</strong>. Cross-portal navigation to this section is strictly forbidden.
+            </p>
+            <p className="text-[11px] text-red-700 pt-1 border-t border-red-200">
+              Automatically redirecting to your authorized dashboard in <strong>{countdown}s</strong>...
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <Link
-            href={target.path}
-            className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition"
+            href={userTarget.path}
+            className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
           >
-            Go to My Portal ({target.icon} {target.name})
+            <span>Return to Authorized Dashboard ({userTarget.icon} {userTarget.name})</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
-          <button
-            onClick={() => quickLoginPreset(allowedRole)}
+          <Link
+            href="/login"
             className="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition"
           >
-            Switch to {allowedRole === "ISSUER" ? "College Email" : allowedRole === "STUDENT" ? "Student Email" : "Company Email"}
-          </button>
+            Switch Account
+          </Link>
         </div>
       </div>
     );

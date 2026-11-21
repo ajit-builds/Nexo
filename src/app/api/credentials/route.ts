@@ -126,8 +126,18 @@ export async function GET(request: NextRequest) {
   // If studentId matches or search is broad
   const matchingAcademic = academicCredentials.find((c) => c.claims.student_id === studentId) || academicCredentials[0];
 
-  // Pick first experience letter for portfolio demo
-  const sampleExperience = experienceCredentials[0];
+  // Pick experience letter and synchronize employee_name to the active candidate
+  let sampleExperience = experienceCredentials[0];
+  if (sampleExperience && matchingAcademic) {
+    const studentName = String(matchingAcademic.claims.full_name);
+    sampleExperience = {
+      ...sampleExperience,
+      claims: {
+        ...sampleExperience.claims,
+        employee_name: studentName,
+      },
+    };
+  }
 
   let results: NexoCredential[] = [];
   if (matchingAcademic) results.push(matchingAcademic);
