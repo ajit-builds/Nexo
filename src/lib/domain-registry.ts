@@ -162,6 +162,56 @@ export const APPROVED_DOMAINS: Record<string, DomainConfig> = {
     portalPath: '/verify',
     aliasPaths: ['/reviewer'],
   },
+
+  // 4. Candidate & Webmail Domains (Approved for Student Wallet)
+  'gmail.com': {
+    domain: 'gmail.com',
+    role: 'student',
+    roleLabel: 'Candidate (Credential Holder)',
+    organizationName: 'Independent Candidate',
+    portalPath: '/student',
+    aliasPaths: ['/student-wallet'],
+  },
+  'googlemail.com': {
+    domain: 'googlemail.com',
+    role: 'student',
+    roleLabel: 'Candidate (Credential Holder)',
+    organizationName: 'Independent Candidate',
+    portalPath: '/student',
+    aliasPaths: ['/student-wallet'],
+  },
+  'yahoo.com': {
+    domain: 'yahoo.com',
+    role: 'student',
+    roleLabel: 'Candidate (Credential Holder)',
+    organizationName: 'Independent Candidate',
+    portalPath: '/student',
+    aliasPaths: ['/student-wallet'],
+  },
+  'outlook.com': {
+    domain: 'outlook.com',
+    role: 'student',
+    roleLabel: 'Candidate (Credential Holder)',
+    organizationName: 'Independent Candidate',
+    portalPath: '/student',
+    aliasPaths: ['/student-wallet'],
+  },
+  'hotmail.com': {
+    domain: 'hotmail.com',
+    role: 'student',
+    roleLabel: 'Candidate (Credential Holder)',
+    organizationName: 'Independent Candidate',
+    portalPath: '/student',
+    aliasPaths: ['/student-wallet'],
+  },
+  'icloud.com': {
+    domain: 'icloud.com',
+    role: 'student',
+    roleLabel: 'Candidate (Credential Holder)',
+    organizationName: 'Independent Candidate',
+    portalPath: '/student',
+    aliasPaths: ['/student-wallet'],
+  },
 };
 
 /**

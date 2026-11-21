@@ -67,10 +67,15 @@ function LoginForm() {
 
     try {
       const computeTarget = (res: { portalPath?: string; role?: AppRole }) => {
-        if (redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')) {
-          return redirectTarget;
+        const redirectParam = searchParams.get("redirect") || redirectTarget;
+        const defaultTarget = res.portalPath || ROLE_PORTALS[res.role || "student"].canonical;
+        if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+          if (redirectParam.startsWith("/verify") && res.role === "reviewer") return redirectParam;
+          if (redirectParam.startsWith("/recruiter") && res.role === "reviewer") return redirectParam;
+          if (redirectParam.startsWith("/student") && res.role === "student") return redirectParam;
+          if (redirectParam.startsWith("/university") && res.role === "issuer") return redirectParam;
         }
-        return res.portalPath || ROLE_PORTALS[res.role || "student"].canonical;
+        return defaultTarget;
       };
 
       if (mode === "login") {
