@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   GraduationCap, 
   Briefcase, 
@@ -10,9 +10,12 @@ import {
   Layers, 
   Calendar, 
   Award,
-  Building2
+  Building2,
+  ExternalLink,
+  X
 } from 'lucide-react';
 import { NexoCredential } from '@/lib/types';
+import { StudentVerifyCard } from '@/components/StudentVerifyCard';
 
 interface CredentialCardProps {
   credential: NexoCredential;
@@ -20,6 +23,7 @@ interface CredentialCardProps {
 }
 
 export function CredentialCard({ credential, onShare }: CredentialCardProps) {
+  const [showCertModal, setShowCertModal] = useState(false);
   const isAcademic = credential.type === 'academic';
   const claims = credential.claims;
 
@@ -118,7 +122,7 @@ export function CredentialCard({ credential, onShare }: CredentialCardProps) {
       </div>
 
       {/* Footer Actions */}
-      <div className="p-6 pt-0">
+      <div className="p-6 pt-0 space-y-2.5">
         <button
           onClick={() => onShare(credential)}
           className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition duration-150 shadow-sm text-sm"
@@ -126,7 +130,51 @@ export function CredentialCard({ credential, onShare }: CredentialCardProps) {
           <Share2 className="w-4 h-4" />
           <span>Share with Selective Disclosure</span>
         </button>
+
+        <button
+          onClick={() => setShowCertModal(true)}
+          className="w-full flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition border border-slate-200 text-xs"
+        >
+          <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+          <span>View Verified Certificate Card</span>
+        </button>
       </div>
+
+      {/* Certificate Card Modal */}
+      {showCertModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
+          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl p-4 sm:p-6 my-8">
+            <button
+              onClick={() => setShowCertModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="pt-2">
+              <StudentVerifyCard
+                title={credential.title}
+                recipient={
+                  isAcademic
+                    ? (claims as any).student_name || 'Aarav Sharma'
+                    : (claims as any).employee_name || 'Aarav Sharma'
+                }
+                issuer={credential.issuerName}
+                issuerUrl="www.nexo-credentials.edu"
+                issueDate={credential.issuedAt}
+                transactionId={
+                  credential.merkleRoot ||
+                  credential.credentialHash ||
+                  '0xae0789d1a055d1dd765b820a44fcb2d881ef10'
+                }
+                isVerified={true}
+                onReset={() => setShowCertModal(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

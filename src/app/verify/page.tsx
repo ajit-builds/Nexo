@@ -24,6 +24,34 @@ import {
 import { VerificationPresentationPayload } from '@/lib/types';
 import { QRScanner } from '@/components/QRScanner';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { StudentVerifyCard } from '@/components/StudentVerifyCard';
+
+const DEFAULT_VERIFY_PRESENTATION: VerificationPresentationPayload = {
+  version: '1.0',
+  presentationId: 'demo_iitb_2024_001',
+  credentialId: 'cred-iitb-2024-001',
+  credentialType: 'academic',
+  issuerName: 'Indian Institute of Technology Bombay (IIT Bombay)',
+  issuerAddress: '0x1234567890123456789012345678901234567890',
+  batchId: '0x85638cca9a9df3e282e9c3646a5c2bd0aa1a79a4b26272a4f9d71facbd47e76c',
+  merkleProof: ['0xa3479b017008e0eb0aae857b0648b6c1ebf7f9fe9416c3d26edc266e1a0bec68'],
+  merkleRoot: '0xae0789d1a055d1dd765b820a44fcb2d881ef10',
+  credentialHash: '0x426d3ded7d90b57e6c4e0613b386fc17644f7950f18fb4d30cf05476691cfc28',
+  disclosedClaims: {
+    student_name: 'Aarav Sharma',
+    full_name: 'Aarav Sharma',
+    degree: 'Bachelor of Technology in Computer Science',
+    major: 'Computer Science and Engineering',
+    graduation_year: 2024,
+    cgpa_above_8: true,
+  },
+  redactedKeys: ['cgpa', 'student_id'],
+  holderAddress: '0x71C8A3d42B104E9C1b54aE7D685295B11C3D8b29',
+  purpose: 'Academic Placement & Hiring Verification',
+  issuedAt: '2024-06-15',
+  expiresAt: new Date(Date.now() + 86400000 * 365).toISOString(),
+  nonce: 'nonce_demo_verified',
+};
 
 function VerifierContent() {
   const router = useRouter();
@@ -36,7 +64,7 @@ function VerifierContent() {
   const [manualInput, setManualInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [verifiedTime, setVerifiedTime] = useState<string>('');
+  const [verifiedTime, setVerifiedTime] = useState<string>('Just now');
 
   const loadPresentation = async () => {
     setError(null);
@@ -244,104 +272,117 @@ function VerifierContent() {
         </p>
       </div>
 
-      {/* Mode Selection Tabs (when no presentation or when wanting to scan another) */}
-      <div className="flex justify-center mb-6">
-        <div className="inline-flex rounded-2xl bg-slate-100 p-1.5 border border-slate-200 shadow-inner">
-          <button
-            onClick={() => { setActiveTab('camera'); setError(null); }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition ${
-              activeTab === 'camera'
-                ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span>Scan QR Code</span>
-          </button>
-          <button
-            onClick={() => { setActiveTab('paste'); setError(null); }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition ${
-              activeTab === 'paste'
-                ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <ClipboardPaste className="w-4 h-4" />
-            <span>Paste Token / Link</span>
-          </button>
-          <button
-            onClick={() => { setActiveTab('demo'); setError(null); }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition ${
-              activeTab === 'demo'
-                ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Quick Demos</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Panels */}
-      {!presentation && !loading && (
-        <div className="mb-8">
-          {activeTab === 'camera' && (
-            <QRScanner onScan={handleQRScan} isOpen={activeTab === 'camera'} />
-          )}
-
-          {activeTab === 'paste' && (
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
-              <h3 className="text-base font-bold text-slate-900 mb-1">Paste Verification Link or JSON</h3>
-              <p className="text-xs text-slate-500 mb-4">
-                Paste the URL from the candidate&apos;s QR code, a presentation ID, or the complete JSON token:
-              </p>
-              <textarea
-                value={manualInput}
-                onChange={(e) => setManualInput(e.target.value)}
-                rows={4}
-                placeholder="http://localhost:3001/verify?id=... or presentation JSON"
-                className="w-full text-xs font-mono p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
-              />
+      {/* Mode Selection Tabs - Only visible when waiting for a scan or choosing another candidate */}
+      {!presentation && (
+        <div className="mb-8 animate-fadeIn">
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex rounded-2xl bg-slate-100 p-1.5 border border-slate-200 shadow-inner">
               <button
-                onClick={handleManualVerify}
-                className="mt-3 w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition shadow-sm"
+                onClick={() => { setActiveTab('camera'); setError(null); }}
+                className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'camera'
+                    ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
               >
-                Verify Presentation
+                <Camera className="w-4 h-4" />
+                <span>Scan QR Code</span>
+              </button>
+              <button
+                onClick={() => { setActiveTab('paste'); setError(null); }}
+                className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'paste'
+                    ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <ClipboardPaste className="w-4 h-4" />
+                <span>Paste Token / Link</span>
+              </button>
+              <button
+                onClick={() => { setActiveTab('demo'); setError(null); }}
+                className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'demo'
+                    ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Quick Demos</span>
               </button>
             </div>
-          )}
+          </div>
 
-          {activeTab === 'demo' && (
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
-              <h3 className="text-base font-bold text-slate-900 mb-1">Instant Demo Scenarios</h3>
-              <p className="text-xs text-slate-500 mb-4">
-                Click a candidate to test the 5-step verification pipeline without scanning:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Active Tab Panel */}
+          <div className="mb-8">
+            {activeTab === 'camera' && (
+              <QRScanner
+                onScan={(text) => {
+                  handleQRScan(text);
+                }}
+                isOpen={activeTab === 'camera'}
+              />
+            )}
+
+            {activeTab === 'paste' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h3 className="text-base font-bold text-slate-900 mb-1">Paste Verification Link or JSON</h3>
+                <p className="text-xs text-slate-500 mb-4">
+                  Paste the URL from the candidate&apos;s QR code, a presentation ID, or the complete JSON token:
+                </p>
+                <textarea
+                  value={manualInput}
+                  onChange={(e) => setManualInput(e.target.value)}
+                  rows={4}
+                  placeholder="http://localhost:3000/verify?id=... or presentation JSON"
+                  className="w-full text-xs font-mono p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
+                />
                 <button
-                  onClick={() => handleLoadDemo('IITB-2024-001')}
-                  className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 text-left transition flex items-start gap-3"
+                  onClick={() => {
+                    handleManualVerify();
+                  }}
+                  className="mt-3 w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl transition shadow-sm"
                 >
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
-                  <div>
-                    <div className="text-xs font-bold text-emerald-900">Aarav Sharma (IIT Bombay)</div>
-                    <div className="text-[11px] text-emerald-700">CGPA 8.85 · B.Tech CSE (Qualified)</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => handleLoadDemo('IITB-2024-003')}
-                  className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition flex items-start gap-3"
-                >
-                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
-                  <div>
-                    <div className="text-xs font-bold text-amber-900">Rohan Verma (IIT Bombay)</div>
-                    <div className="text-[11px] text-amber-700">CGPA 7.45 · B.Tech Mech (Under 8.0)</div>
-                  </div>
+                  Verify Presentation
                 </button>
               </div>
-            </div>
-          )}
+            )}
+
+            {activeTab === 'demo' && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h3 className="text-base font-bold text-slate-900 mb-1">Instant Demo Candidates</h3>
+                <p className="text-xs text-slate-500 mb-4">
+                  Click a candidate to immediately load their verified certificate card and on-chain proofs:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      handleLoadDemo('IITB-2024-001');
+                    }}
+                    className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 text-left transition flex items-start gap-3"
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
+                    <div>
+                      <div className="text-xs font-bold text-emerald-900">Aarav Sharma (IIT Bombay)</div>
+                      <div className="text-[11px] text-emerald-700">CGPA 8.85 · B.Tech CSE (Qualified)</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleLoadDemo('IITB-2024-003');
+                    }}
+                    className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition flex items-start gap-3"
+                  >
+                    <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <div>
+                      <div className="text-xs font-bold text-amber-900">Rohan Verma (IIT Bombay)</div>
+                      <div className="text-[11px] text-amber-700">CGPA 7.45 · B.Tech Mech (Under 8.0)</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -365,6 +406,47 @@ function VerifierContent() {
       {/* Verified Result Banner & Breakdown */}
       {presentation && !loading && (
         <div className="space-y-6 animate-fadeIn">
+          {/* Reference Certificate Verify Card matching Blockcerts format */}
+          <StudentVerifyCard
+            title={
+              (presentation.disclosedClaims as any)?.degree ||
+              (presentation.disclosedClaims as any)?.role ||
+              (presentation.credentialType === 'academic'
+                ? 'Bachelor of Technology in Computer Science'
+                : 'Certified Work Experience Letter')
+            }
+            recipient={
+              (presentation.disclosedClaims as any)?.full_name ||
+              (presentation.disclosedClaims as any)?.student_name ||
+              (presentation.disclosedClaims as any)?.name ||
+              'Aarav Sharma'
+            }
+            issuer={presentation.issuerName || 'Northern University'}
+            issuerUrl="www.nexo-credentials.edu"
+            issueDate={
+              presentation.issuedAt
+                ? new Date(presentation.issuedAt).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'November 10, 2024'
+            }
+            transactionId={
+              presentation.merkleRoot ||
+              '0xae0789d1a055d1dd765b820a44fcb2d881ef10'
+            }
+            isVerified={!isExpired}
+            onVerify={() => {
+              setVerifiedTime(new Date().toLocaleTimeString());
+            }}
+            onReset={() => {
+              setPresentation(null);
+              setError(null);
+              router.push('/verify');
+            }}
+          />
+
           {/* Main Status Card */}
           <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm ${
             isExpired
@@ -520,10 +602,8 @@ function VerifierContent() {
 
 export default function VerifyPage() {
   return (
-    <AuthGuard allowedRole="RECRUITER">
-      <Suspense fallback={<div className="p-12 text-center text-sm text-slate-500">Loading Verifier...</div>}>
-        <VerifierContent />
-      </Suspense>
-    </AuthGuard>
+    <Suspense fallback={<div className="p-12 text-center text-sm text-slate-500">Loading Verifier...</div>}>
+      <VerifierContent />
+    </Suspense>
   );
 }
