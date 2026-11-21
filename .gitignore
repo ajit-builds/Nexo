@@ -10,6 +10,7 @@
 /cache
 /typechain
 /typechain-types
+*.tsbuildinfo
 
 # Production / Next.js
 /.next/
