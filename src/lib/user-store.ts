@@ -55,7 +55,9 @@ seedUser('admin@university.edu.in', 'Dr. S. K. Mukherjee', 'Password@123');
 seedUser('registrar@iitb.ac.in', 'Dr. K. Ramaswamy', 'Password@123');
 seedUser('student@college.isu.ac.in', 'Aarav Sharma', 'Password@123');
 seedUser('aarav.sharma@college.isu.ac.in', 'Aarav Sharma', 'Password@123');
+seedUser('candidate@gmail.com', 'Nexo Candidate', 'Password@123');
 seedUser('hr@company.com', 'Sarah Jenkins', 'Password@123');
+seedUser('recruiter@company.com', 'Priya Nair', 'Password@123');
 seedUser('recruiter@google.com', 'Priya Sundaram', 'Password@123');
 
 export type AuthResult =

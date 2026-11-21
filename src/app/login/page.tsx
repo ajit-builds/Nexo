@@ -72,7 +72,14 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        const target = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
+        const redirectParam = searchParams.get("redirect");
+        const defaultTarget = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
+        let target = defaultTarget;
+        if (redirectParam) {
+          if (redirectParam.startsWith("/verify") && result.role === "reviewer") target = redirectParam;
+          else if (redirectParam.startsWith("/student") && result.role === "student") target = redirectParam;
+          else if (redirectParam.startsWith("/university") && result.role === "issuer") target = redirectParam;
+        }
         router.push(target);
       } else {
         const result = await register(email, password, name);
@@ -81,7 +88,14 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        const target = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
+        const redirectParam = searchParams.get("redirect");
+        const defaultTarget = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
+        let target = defaultTarget;
+        if (redirectParam) {
+          if (redirectParam.startsWith("/verify") && result.role === "reviewer") target = redirectParam;
+          else if (redirectParam.startsWith("/student") && result.role === "student") target = redirectParam;
+          else if (redirectParam.startsWith("/university") && result.role === "issuer") target = redirectParam;
+        }
         router.push(target);
       }
     } catch (err: any) {
