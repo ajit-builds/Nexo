@@ -1,0 +1,7 @@
+student_id,full_name,degree,major,graduation_year,cgpa,cgpa_above_8,institution_name,issue_date
+IITB-2024-001,Aarav Sharma,Bachelor of Technology,Computer Science and Engineering,2024,8.85,true,IIT Bombay,2024-06-15
+IITB-2024-002,Priya Patel,Bachelor of Technology,Electrical Engineering,2024,8.20,true,IIT Bombay,2024-06-15
+IITB-2024-003,Rohan Verma,Bachelor of Technology,Mechanical Engineering,2024,7.45,false,IIT Bombay,2024-06-15
+IITB-2024-004,Ananya Iyer,Bachelor of Technology,Computer Science and Engineering,2024,9.40,true,IIT Bombay,2024-06-15
+IITB-2024-005,Vikram Singh,Bachelor of Technology,Civil Engineering,2024,7.80,false,IIT Bombay,2024-06-15
+

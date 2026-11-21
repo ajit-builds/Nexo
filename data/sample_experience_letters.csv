@@ -1,0 +1,5 @@
+employee_id,employee_name,company_name,designation,department,start_date,end_date,experience_years,conduct_rating
+EMP-TCS-1092,Neha Reddy,Tata Consultancy Services,Senior Systems Engineer,Cloud & Infrastructure,2021-08-01,2024-04-30,2.75,Exemplary
+EMP-INFY-4819,Siddharth Sen,Infosys Limited,Specialist Programmer,AI/ML Labs,2022-01-10,2024-05-15,2.35,Outstanding
+EMP-WIP-7731,Kavita Rao,Wipro Technologies,Software Engineer,Banking & Financial Services,2020-09-01,2023-11-30,3.25,Very Good
+
