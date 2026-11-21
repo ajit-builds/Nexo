@@ -80,7 +80,7 @@ export type AuthResult =
     };
 
 /**
- * Authenticate user credentials with strict domain and password checks
+ * Authenticate user credentials with strict domain, existence, and password checks
  */
 export function authenticateUser(email: string, plainPassword: string): AuthResult {
   const normEmail = normalizeEmail(email);
@@ -98,48 +98,14 @@ export function authenticateUser(email: string, plainPassword: string): AuthResu
   // 2. Lookup user in store
   const existing = userStore.get(normEmail);
   if (!existing) {
-    // If not found in seed, but domain IS approved, check if demo password matches for instant onboarding
-    if (plainPassword === 'Password@123' || plainPassword.length >= 6) {
-      // Auto-register valid approved domain user
-      const name = normEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      const salt = generateSalt();
-      const passwordHash = hashPassword(plainPassword, salt);
-
-      const newUser: UserAccount = {
-        id: `usr_${crypto.randomUUID().slice(0, 8)}`,
-        email: normEmail,
-        name,
-        passwordHash,
-        salt,
-        role: domainValidation.role,
-        domain: domainValidation.domain,
-        organizationName: domainValidation.organizationName,
-        createdAt: new Date().toISOString(),
-      };
-      userStore.set(normEmail, newUser);
-
-      return {
-        success: true,
-        user: {
-          id: newUser.id,
-          email: newUser.email,
-          name: newUser.name,
-          role: newUser.role,
-          domain: newUser.domain,
-          organizationName: newUser.organizationName,
-          portalPath: domainValidation.portalPath,
-        },
-      };
-    }
-
     return {
       success: false,
-      error: 'Invalid email or password. Please check your credentials.',
-      status: 401,
+      error: 'Account not found. Please register an account with your official email.',
+      status: 404,
     };
   }
 
-  // 3. Verify password
+  // 3. Verify password hash using PBKDF2
   const testHash = hashPassword(plainPassword, existing.salt);
   if (testHash !== existing.passwordHash) {
     return {
@@ -197,14 +163,14 @@ export function registerUser(email: string, plainPassword: string, name?: string
     };
   }
 
-  // 3. Check if already exists
+  // 3. Check if already exists; if so, verify credentials
   if (userStore.has(normEmail)) {
     return authenticateUser(normEmail, plainPassword);
   }
 
   const salt = generateSalt();
   const passwordHash = hashPassword(plainPassword, salt);
-  const displayName = name || normEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const displayName = name?.trim() || normEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   const newUser: UserAccount = {
     id: `usr_${crypto.randomUUID().slice(0, 8)}`,

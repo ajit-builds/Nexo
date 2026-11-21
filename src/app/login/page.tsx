@@ -37,6 +37,7 @@ function LoginForm() {
   const { login, register, quickLoginPreset } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect");
 
   // Real-time domain validation as user types
   const domainValidation = useMemo(() => {
@@ -65,6 +66,18 @@ function LoginForm() {
     setSubmitting(true);
 
     try {
+      const computeTarget = (res: { portalPath?: string; role?: AppRole }) => {
+        const redirectParam = searchParams.get("redirect") || redirectTarget;
+        const defaultTarget = res.portalPath || ROLE_PORTALS[res.role || "student"].canonical;
+        if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+          if (redirectParam.startsWith("/verify") && res.role === "reviewer") return redirectParam;
+          if (redirectParam.startsWith("/recruiter") && res.role === "reviewer") return redirectParam;
+          if (redirectParam.startsWith("/student") && res.role === "student") return redirectParam;
+          if (redirectParam.startsWith("/university") && res.role === "issuer") return redirectParam;
+        }
+        return defaultTarget;
+      };
+
       if (mode === "login") {
         const result = await login(email, password);
         if (!result.success) {
@@ -72,15 +85,7 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        const redirectParam = searchParams.get("redirect");
-        const defaultTarget = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
-        let target = defaultTarget;
-        if (redirectParam) {
-          if (redirectParam.startsWith("/verify") && result.role === "reviewer") target = redirectParam;
-          else if (redirectParam.startsWith("/student") && result.role === "student") target = redirectParam;
-          else if (redirectParam.startsWith("/university") && result.role === "issuer") target = redirectParam;
-        }
-        router.push(target);
+        router.push(computeTarget(result));
       } else {
         const result = await register(email, password, name);
         if (!result.success) {
@@ -88,15 +93,7 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        const redirectParam = searchParams.get("redirect");
-        const defaultTarget = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
-        let target = defaultTarget;
-        if (redirectParam) {
-          if (redirectParam.startsWith("/verify") && result.role === "reviewer") target = redirectParam;
-          else if (redirectParam.startsWith("/student") && result.role === "student") target = redirectParam;
-          else if (redirectParam.startsWith("/university") && result.role === "issuer") target = redirectParam;
-        }
-        router.push(target);
+        router.push(computeTarget(result));
       }
     } catch (err: any) {
       setErrorMessage(err.message || "An unexpected error occurred.");
@@ -112,6 +109,8 @@ function LoginForm() {
       if (!result.success) {
         setErrorMessage(result.error || "Preset login failed.");
         setSubmitting(false);
+      } else if (redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')) {
+        router.push(redirectTarget);
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Preset login failed.");

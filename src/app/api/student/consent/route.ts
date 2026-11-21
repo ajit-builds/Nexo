@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const results: ConsentLogEntry[] = logs.map((l) => ({
+    const results: ConsentLogEntry[] = logs.map((l: any) => ({
       id: l.id,
       recipient: l.recipient,
       purpose: l.purpose,
