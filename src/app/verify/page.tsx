@@ -34,7 +34,22 @@ function VerifierContent() {
   const loadPresentation = async () => {
     setError(null);
 
-    // Option A: Direct embedded data in query
+    // Option A: Check localStorage for instant client-side lookup
+    if (presentationId && typeof window !== 'undefined') {
+      const cached = localStorage.getItem(`nexo_pres_${presentationId}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setPresentation(parsed);
+          setVerifiedTime(new Date().toLocaleTimeString());
+          return;
+        } catch {
+          // continue to API
+        }
+      }
+    }
+
+    // Option B: Direct embedded data in query
     if (rawData) {
       try {
         const decoded = JSON.parse(decodeURIComponent(rawData));
@@ -46,7 +61,7 @@ function VerifierContent() {
       }
     }
 
-    // Option B: Fetch via presentation ID from API
+    // Option C: Fetch via presentation ID from API
     if (presentationId) {
       setLoading(true);
       try {
@@ -56,7 +71,15 @@ function VerifierContent() {
           setPresentation(data.presentation);
           setVerifiedTime(new Date().toLocaleTimeString());
         } else {
-          setError(data.error || 'Presentation expired or not found.');
+          // Try student presentation endpoint as fallback
+          const fallbackRes = await fetch(`/api/student/presentation?id=${presentationId}`);
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData.success && fallbackData.presentation) {
+            setPresentation(fallbackData.presentation);
+            setVerifiedTime(new Date().toLocaleTimeString());
+          } else {
+            setError(data.error || 'Presentation expired or not found.');
+          }
         }
       } catch (err: any) {
         setError('Failed to fetch presentation from network.');

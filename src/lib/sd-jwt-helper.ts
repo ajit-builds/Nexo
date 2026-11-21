@@ -204,15 +204,20 @@ export async function createSelectivePresentation(
  * Encodes a direct verification URL so phone cameras and verifier scanners work instantly!
  */
 export async function generatePresentationQRCode(payload: VerificationPresentationPayload): Promise<{ dataUrl: string; verificationUrl: string }> {
-  // First persist presentation via API endpoint
   let verificationUrl = '';
   if (typeof window !== 'undefined') {
     const origin = window.location.origin;
-    // Embed compressed/safe base64 data for 100% offline support
-    const encodedPayload = encodeURIComponent(JSON.stringify(payload));
-    verificationUrl = `${origin}/verify?id=${payload.presentationId}&data=${encodedPayload}`;
+    // Keep URL ultra-clean and short for instant camera scan
+    verificationUrl = `${origin}/verify?id=${payload.presentationId}`;
 
-    // Also fire background POST to /api/presentation
+    // Store in browser localStorage for 100% offline access
+    try {
+      localStorage.setItem(`nexo_pres_${payload.presentationId}`, JSON.stringify(payload));
+    } catch (e) {
+      console.warn('LocalStorage save notice:', e);
+    }
+
+    // Also persist via backend API
     fetch('/api/presentation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -222,11 +227,11 @@ export async function generatePresentationQRCode(payload: VerificationPresentati
     verificationUrl = `http://localhost:3000/verify?id=${payload.presentationId}`;
   }
 
-  // Generate QR code encoding the direct clickable Verification URL
+  // Generate crisp, fast-scanning QR code
   const dataUrl = await QRCode.toDataURL(verificationUrl, {
-    errorCorrectionLevel: 'M',
-    margin: 2,
-    scale: 6,
+    errorCorrectionLevel: 'L',
+    margin: 1,
+    scale: 8,
     color: {
       dark: '#0f172a',
       light: '#ffffff',

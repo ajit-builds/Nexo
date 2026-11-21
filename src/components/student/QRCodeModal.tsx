@@ -113,7 +113,7 @@ export function QRCodeModal({ payload, isOpen, onClose, onConsentLogged }: QRCod
           </div>
 
           {/* Verification Target Banner */}
-          <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2">
+          <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2.5">
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span className="font-semibold text-slate-700">Target Verifier:</span>
               <span className="font-medium text-slate-900">{payload.purpose.replace('Verification requested by ', '')}</span>
@@ -125,14 +125,37 @@ export function QRCodeModal({ payload, isOpen, onClose, onConsentLogged }: QRCod
                 {expiresDate} (Time-bound)
               </span>
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">Disclosed Claims:</span>
-              <span className="font-semibold text-emerald-600">{Object.keys(payload.disclosedClaims).length} attributes</span>
+
+            {/* Live Disclosed Claims in QR */}
+            <div className="pt-2 border-t border-slate-200">
+              <span className="text-[11px] font-bold text-slate-700 block mb-1.5 uppercase tracking-wider">
+                Disclosed Data Inside QR:
+              </span>
+              <div className="space-y-1 max-h-36 overflow-y-auto">
+                {Object.entries(payload.disclosedClaims).map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 font-mono capitalize">{k.replace(/_/g, ' ')}:</span>
+                    <span className="font-semibold text-indigo-700">{String(v)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">Redacted Claims:</span>
-              <span className="font-semibold text-slate-400">{payload.redactedKeys.length} hidden</span>
-            </div>
+
+            {/* Redacted Claims Notice */}
+            {payload.redactedKeys.length > 0 && (
+              <div className="pt-2 border-t border-slate-200">
+                <span className="text-[11px] font-bold text-slate-500 block mb-1 uppercase tracking-wider">
+                  Redacted (Protected by SD-JWT):
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {payload.redactedKeys.map((k) => (
+                    <span key={k} className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-mono">
+                      {k.replace(/_/g, ' ')}: [HIDDEN]
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick action buttons */}
