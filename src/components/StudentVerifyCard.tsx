@@ -97,6 +97,9 @@ export function StudentVerifyCard({
                 strokeDashoffset="219.8"
               />
 
+              {/* Inner Sky-Blue Circle Fill matching reference logo */}
+              <circle cx="50" cy="50" r="34" fill="#00AEEF" />
+
               {/* Inner White Cloud Icon */}
               <g transform="translate(26, 30) scale(0.96)">
                 <path
