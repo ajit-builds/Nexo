@@ -157,7 +157,7 @@ export function CredentialCard({ credential, onShare }: CredentialCardProps) {
                 title={credential.title}
                 recipient={
                   isAcademic
-                    ? (claims as any).student_name || 'Aarav Sharma'
+                    ? (claims as any).full_name || (claims as any).student_name || 'Aarav Sharma'
                     : (claims as any).employee_name || 'Aarav Sharma'
                 }
                 issuer={credential.issuerName}
