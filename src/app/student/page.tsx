@@ -187,59 +187,59 @@ function StudentDashboardContent() {
       />
 
       {/* 3. Dashboard Navigation Tabs */}
-      <div className="flex border-b border-black/[0.08] overflow-x-auto no-scrollbar gap-2 sm:gap-6">
+      <div className="flex border-b border-neutral-200/90 overflow-x-auto no-scrollbar gap-1 sm:gap-4">
         <button
           onClick={() => setDashboardTab('portfolio')}
-          className={`flex items-center gap-2 pb-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${
+          className={`flex items-center gap-2 pb-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition ${
             dashboardTab === 'portfolio'
-              ? 'border-[#0071e3] text-[#0071e3]'
-              : 'border-transparent text-[#86868b] hover:text-[#1d1d1f]'
+              ? 'border-neutral-900 text-neutral-900'
+              : 'border-transparent text-neutral-400 hover:text-neutral-700'
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>Credential Portfolio</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-[#0071e3]/10 text-[#0071e3] font-semibold">
+          <Layers className="w-3.5 h-3.5" />
+          <span>Credentials</span>
+          <span className="text-[11px] px-2 py-0.2 rounded-full bg-neutral-100 text-neutral-600 font-medium">
             {credentials.length}
           </span>
         </button>
 
         <button
           onClick={() => setDashboardTab('timeline')}
-          className={`flex items-center gap-2 pb-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${
+          className={`flex items-center gap-2 pb-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition ${
             dashboardTab === 'timeline'
-              ? 'border-[#0071e3] text-[#0071e3]'
-              : 'border-transparent text-[#86868b] hover:text-[#1d1d1f]'
+              ? 'border-neutral-900 text-neutral-900'
+              : 'border-transparent text-neutral-400 hover:text-neutral-700'
           }`}
         >
-          <Clock className="w-4 h-4" />
-          <span>Academic &amp; Career Timeline</span>
+          <Clock className="w-3.5 h-3.5" />
+          <span>Timeline</span>
         </button>
 
         <button
           onClick={() => setDashboardTab('dpdp')}
-          className={`flex items-center gap-2 pb-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${
+          className={`flex items-center gap-2 pb-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition ${
             dashboardTab === 'dpdp'
-              ? 'border-[#0071e3] text-[#0071e3]'
-              : 'border-transparent text-[#86868b] hover:text-[#1d1d1f]'
+              ? 'border-neutral-900 text-neutral-900'
+              : 'border-transparent text-neutral-400 hover:text-neutral-700'
           }`}
         >
-          <Share2 className="w-4 h-4" />
-          <span>DPDP Consent Manager</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-200">
+          <Share2 className="w-3.5 h-3.5" />
+          <span>Consent History</span>
+          <span className="text-[11px] px-2 py-0.2 rounded-full bg-neutral-100 text-neutral-600 font-medium">
             {consentLogs.length}
           </span>
         </button>
 
         <button
           onClick={() => setDashboardTab('security')}
-          className={`flex items-center gap-2 pb-4 text-sm font-semibold border-b-2 whitespace-nowrap transition ${
+          className={`flex items-center gap-2 pb-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition ${
             dashboardTab === 'security'
-              ? 'border-[#0071e3] text-[#0071e3]'
-              : 'border-transparent text-[#86868b] hover:text-[#1d1d1f]'
+              ? 'border-neutral-900 text-neutral-900'
+              : 'border-transparent text-neutral-400 hover:text-neutral-700'
           }`}
         >
-          <KeyRound className="w-4 h-4" />
-          <span>Sovereign Security</span>
+          <KeyRound className="w-3.5 h-3.5" />
+          <span>Key Management</span>
         </button>
       </div>
 
@@ -247,36 +247,36 @@ function StudentDashboardContent() {
 
       {/* TAB 1: PORTFOLIO */}
       {dashboardTab === 'portfolio' && (
-        <div className="space-y-8 animate-fadeIn">
+        <div className="space-y-6 animate-fadeIn">
           {/* Sub-header & category filters */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-[#1d1d1f] tracking-tight">
-                Cryptographically Anchored Credentials
+              <h2 className="text-lg font-bold text-neutral-900 tracking-tight">
+                Credentials
               </h2>
-              <p className="text-xs text-[#86868b] mt-0.5">
-                Selectively disclose claims or view your official verified certificate card.
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Official degrees and employment records verifiable on Polygon Amoy.
               </p>
             </div>
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 p-1 bg-[#f5f5f7] rounded-xl border border-black/[0.04] self-start sm:self-auto">
+            <div className="flex items-center gap-1 p-1 bg-neutral-100/80 rounded-xl border border-neutral-200/60 self-start sm:self-auto">
               <button
                 onClick={() => handleCategoryChange('all')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
+                className={`px-3 py-1 text-xs font-medium rounded-lg transition ${
                   activeCategory === 'all'
-                    ? 'bg-white text-[#1d1d1f] shadow-sm'
-                    : 'text-[#86868b] hover:text-[#1d1d1f]'
+                    ? 'bg-white text-neutral-900 shadow-sm'
+                    : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
                 All ({credentials.length})
               </button>
               <button
                 onClick={() => handleCategoryChange('academic')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition ${
                   activeCategory === 'academic'
-                    ? 'bg-white text-[#0071e3] shadow-sm'
-                    : 'text-[#86868b] hover:text-[#1d1d1f]'
+                    ? 'bg-white text-neutral-900 shadow-sm'
+                    : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
                 <GraduationCap className="w-3.5 h-3.5" />
@@ -284,10 +284,10 @@ function StudentDashboardContent() {
               </button>
               <button
                 onClick={() => handleCategoryChange('experience')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-lg transition ${
                   activeCategory === 'experience'
-                    ? 'bg-white text-emerald-700 shadow-sm'
-                    : 'text-[#86868b] hover:text-[#1d1d1f]'
+                    ? 'bg-white text-neutral-900 shadow-sm'
+                    : 'text-neutral-500 hover:text-neutral-900'
                 }`}
               >
                 <Briefcase className="w-3.5 h-3.5" />

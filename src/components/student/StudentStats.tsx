@@ -2,14 +2,10 @@
 
 import React from 'react';
 import { 
-  Award, 
+  FileCheck2, 
   ShieldCheck, 
   Share2, 
-  Zap, 
-  Lock, 
-  TrendingUp, 
-  FileCheck2,
-  CheckCircle2
+  Cpu
 } from 'lucide-react';
 import { NexoCredential, ConsentLogEntry } from '@/lib/types';
 
@@ -25,73 +21,67 @@ export function StudentStats({ credentials, consentLogs }: StudentStatsProps) {
   const totalShares = consentLogs.length;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {/* 1. Verifiable Documents */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-        <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
-          <span>Verifiable Portfolio</span>
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Award className="w-4 h-4" />
+    <div className="bg-white border border-neutral-200/90 rounded-2xl p-5 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-neutral-100">
+        
+        {/* Metric 1: Verified Credentials */}
+        <div className="p-3 sm:px-4 sm:py-2 flex flex-col justify-between">
+          <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
+            Portfolio
+          </span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-bold tracking-tight text-neutral-900">{totalCreds}</span>
+            <span className="text-xs text-neutral-500 font-medium">Credentials</span>
           </div>
+          <p className="text-[11px] text-neutral-400 mt-0.5 truncate">
+            {academicCount} Degree · {experienceCount} Work Experience
+          </p>
         </div>
-        <div className="text-3xl font-black text-slate-900 tracking-tight">
-          {totalCreds}
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-blue-700 font-medium mt-1.5">
-          <FileCheck2 className="w-3.5 h-3.5" />
-          <span>{academicCount} Degree · {experienceCount} Experience</span>
-        </div>
-      </div>
 
-      {/* 2. Privacy Shield (SD-JWT) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-        <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
-          <span>Privacy Shield (SD-JWT)</span>
-          <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <Lock className="w-4 h-4" />
+        {/* Metric 2: Cryptographic Anchor */}
+        <div className="p-3 sm:px-4 sm:py-2 flex flex-col justify-between pt-4 md:pt-2">
+          <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
+            Verification
+          </span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-sm font-semibold text-neutral-900">W3C SD-JWT</span>
+            <span className="inline-flex items-center text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+              Active
+            </span>
           </div>
+          <p className="text-[11px] text-neutral-400 mt-0.5 truncate">
+            Selective disclosure &amp; zero-knowledge predicates
+          </p>
         </div>
-        <div className="text-3xl font-black text-slate-900 tracking-tight flex items-baseline gap-1">
-          100% <span className="text-xs font-semibold text-indigo-600">Active</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-indigo-700 font-medium mt-1.5">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Selective disclosure &amp; predicates</span>
-        </div>
-      </div>
 
-      {/* 3. Recruiter Shares & DPDP Consents */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-        <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
-          <span>DPDP Active Consents</span>
-          <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-            <Share2 className="w-4 h-4" />
+        {/* Metric 3: Active Consents */}
+        <div className="p-3 sm:px-4 sm:py-2 flex flex-col justify-between pt-4 md:pt-2">
+          <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
+            Privacy &amp; Consents
+          </span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-bold tracking-tight text-neutral-900">{totalShares}</span>
+            <span className="text-xs text-neutral-500 font-medium">DPDP Tokens</span>
           </div>
+          <p className="text-[11px] text-neutral-400 mt-0.5 truncate">
+            Time-bound audit logs for verification
+          </p>
         </div>
-        <div className="text-3xl font-black text-slate-900 tracking-tight">
-          {totalShares}
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-purple-700 font-medium mt-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
-          <span>Audit-logged presentation tokens</span>
-        </div>
-      </div>
 
-      {/* 4. Zero Gas Expense */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-        <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
-          <span>Student Gas Incurred</span>
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Zap className="w-4 h-4" />
+        {/* Metric 4: On-Chain Settlement */}
+        <div className="p-3 sm:px-4 sm:py-2 flex flex-col justify-between pt-4 md:pt-2">
+          <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
+            Network Anchor
+          </span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-sm font-semibold text-neutral-900">Polygon Amoy</span>
+            <span className="text-[10px] text-neutral-400 font-mono">Chain 80002</span>
           </div>
+          <p className="text-[11px] text-neutral-400 mt-0.5 truncate">
+            Zero gas cost for student holders
+          </p>
         </div>
-        <div className="text-3xl font-black text-slate-900 tracking-tight">
-          0.00 <span className="text-xs font-bold text-slate-400">MATIC</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium mt-1.5">
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span>100% Relayer subsidized</span>
-        </div>
+
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Shield, Clock, CheckCircle2, History } from 'lucide-react';
+import { Shield, Clock, Check, History } from 'lucide-react';
 import { ConsentLogEntry } from '@/lib/types';
 import { Pagination } from '@/components/ui/Pagination';
 
@@ -20,12 +20,12 @@ export function ConsentHistoryTable({ logs }: ConsentHistoryTableProps) {
 
   if (logs.length === 0) {
     return (
-      <div className="bg-white border border-black/[0.06] rounded-3xl p-10 text-center shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-        <div className="w-12 h-12 rounded-2xl bg-[#f5f5f7] flex items-center justify-center text-[#86868b] mx-auto mb-3">
-          <History className="w-6 h-6" />
+      <div className="bg-white border border-neutral-200/90 rounded-2xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+        <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-400 mx-auto mb-3">
+          <History className="w-5 h-5" />
         </div>
-        <h4 className="text-sm font-semibold text-[#1d1d1f]">No Sharing History Yet</h4>
-        <p className="text-xs text-[#86868b] mt-1 max-w-sm mx-auto leading-relaxed">
+        <h4 className="text-sm font-semibold text-neutral-900">No Sharing History Yet</h4>
+        <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto leading-relaxed">
           Whenever you share a credential using selective disclosure, a DPDP-compliant consent record will be immutably recorded here.
         </p>
       </div>
@@ -33,20 +33,15 @@ export function ConsentHistoryTable({ logs }: ConsentHistoryTableProps) {
   }
 
   return (
-    <div className="bg-white border border-black/[0.06] rounded-3xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-4 p-6 sm:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
-        <div className="flex items-center gap-3">
-          <span className="p-2.5 bg-[#0071e3]/10 text-[#0071e3] rounded-2xl">
-            <Shield className="w-4 h-4" />
-          </span>
-          <div>
-            <h3 className="text-base font-bold text-[#1d1d1f] tracking-tight">Consent & Sharing Log</h3>
-            <p className="text-xs text-[#86868b] mt-0.5">
-              DPDP Act (India) compliant: Audit log of all verifications and consent grants.
-            </p>
-          </div>
+    <div className="bg-white border border-neutral-200/90 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-4 p-6 sm:p-7">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-100">
+        <div>
+          <h3 className="text-base font-bold text-neutral-900 tracking-tight">Consent &amp; Sharing Log</h3>
+          <p className="text-xs text-neutral-400 mt-0.5">
+            Audit-log of selective disclosure tokens and verification consents.
+          </p>
         </div>
-        <span className="text-xs font-semibold bg-[#f5f5f7] text-[#1d1d1f] px-3 py-1 rounded-full border border-black/[0.04] self-start sm:self-auto">
+        <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-lg self-start sm:self-auto font-mono">
           {logs.length} Total Shares
         </span>
       </div>
@@ -54,43 +49,43 @@ export function ConsentHistoryTable({ logs }: ConsentHistoryTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-black/[0.04] text-[11px] font-semibold text-[#86868b] uppercase tracking-wider">
-              <th className="py-3 px-4">Target Recruiter</th>
-              <th className="py-3 px-4">Credential</th>
-              <th className="py-3 px-4">Disclosed Fields</th>
-              <th className="py-3 px-4">Timestamp</th>
-              <th className="py-3 px-4">Status</th>
+            <tr className="border-b border-neutral-100 text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
+              <th className="py-2.5 px-3">Target Recruiter</th>
+              <th className="py-2.5 px-3">Credential</th>
+              <th className="py-2.5 px-3">Disclosed Fields</th>
+              <th className="py-2.5 px-3">Timestamp</th>
+              <th className="py-2.5 px-3">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/[0.03] text-xs">
+          <tbody className="divide-y divide-neutral-100 text-xs">
             {pagedLogs.map((log) => {
               const isExpired = new Date(log.expiresAt).getTime() < Date.now();
               return (
-                <tr key={log.id} className="hover:bg-[#f5f5f7]/60 transition">
-                  <td className="py-3.5 px-4 font-semibold text-[#1d1d1f]">
+                <tr key={log.id} className="hover:bg-neutral-50/70 transition">
+                  <td className="py-3 px-3 font-medium text-neutral-900">
                     {log.recipient}
                   </td>
-                  <td className="py-3.5 px-4 text-[#86868b]">
+                  <td className="py-3 px-3 text-neutral-600">
                     {log.credentialTitle}
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-3">
                     <div className="flex flex-wrap gap-1 max-w-xs">
                       {log.disclosedClaims.slice(0, 3).map((claim) => (
                         <span
                           key={claim}
-                          className="px-2 py-0.5 bg-[#f5f5f7] text-[#1d1d1f] text-[10px] font-mono rounded-md border border-black/[0.04]"
+                          className="px-2 py-0.5 bg-neutral-100 text-neutral-700 text-[10px] font-mono rounded"
                         >
                           {claim}
                         </span>
                       ))}
                       {log.disclosedClaims.length > 3 && (
-                        <span className="px-2 py-0.5 bg-[#0071e3]/10 text-[#0071e3] text-[10px] font-semibold rounded-md">
-                          +{log.disclosedClaims.length - 3} more
+                        <span className="px-1.5 py-0.5 bg-neutral-200/60 text-neutral-700 text-[10px] font-medium rounded">
+                          +{log.disclosedClaims.length - 3}
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 text-[#86868b] whitespace-nowrap text-[11px]">
+                  <td className="py-3 px-3 text-neutral-400 whitespace-nowrap text-[11px]">
                     {new Date(log.timestamp).toLocaleDateString([], {
                       month: 'short',
                       day: 'numeric',
@@ -98,15 +93,14 @@ export function ConsentHistoryTable({ logs }: ConsentHistoryTableProps) {
                       minute: '2-digit',
                     })}
                   </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
+                  <td className="py-3 px-3 whitespace-nowrap">
                     {isExpired ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#86868b] bg-[#f5f5f7] px-2.5 py-0.5 rounded-full">
-                        <Clock className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-500">
                         Expired
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#34c759] bg-[#34c759]/10 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700">
+                        <Check className="w-2.5 h-2.5 text-emerald-600 stroke-[3]" />
                         Active
                       </span>
                     )}
