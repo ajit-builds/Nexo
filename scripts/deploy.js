@@ -26,10 +26,16 @@ async function main() {
     console.warn("  -> https://www.alchemy.com/faucets/polygon-amoy\n");
   }
 
+  // EIP-1559 gas settings for Polygon Amoy
+  const overrides = {
+    maxPriorityFeePerGas: 45000000000n, // 45 gwei priority tip
+    maxFeePerGas: 120000000000n, // 120 gwei max fee
+  };
+
   // 1. Deploy TrustRegistry
   console.log("\n[1/3] Deploying TrustRegistry...");
   const TrustRegistry = await hre.ethers.getContractFactory("TrustRegistry");
-  const trustRegistry = await TrustRegistry.deploy();
+  const trustRegistry = await TrustRegistry.deploy(overrides);
   await trustRegistry.waitForDeployment();
   const trustRegistryAddress = await trustRegistry.getAddress();
   console.log(`✔ TrustRegistry deployed at: ${trustRegistryAddress}`);
@@ -37,7 +43,7 @@ async function main() {
   // 2. Deploy CredentialAnchor
   console.log("\n[2/3] Deploying CredentialAnchor...");
   const CredentialAnchor = await hre.ethers.getContractFactory("CredentialAnchor");
-  const credentialAnchor = await CredentialAnchor.deploy(trustRegistryAddress);
+  const credentialAnchor = await CredentialAnchor.deploy(trustRegistryAddress, overrides);
   await credentialAnchor.waitForDeployment();
   const credentialAnchorAddress = await credentialAnchor.getAddress();
   console.log(`✔ CredentialAnchor deployed at: ${credentialAnchorAddress}`);
@@ -45,7 +51,7 @@ async function main() {
   // 3. Deploy RevocationRegistry
   console.log("\n[3/3] Deploying RevocationRegistry...");
   const RevocationRegistry = await hre.ethers.getContractFactory("RevocationRegistry");
-  const revocationRegistry = await RevocationRegistry.deploy(trustRegistryAddress);
+  const revocationRegistry = await RevocationRegistry.deploy(trustRegistryAddress, overrides);
   await revocationRegistry.waitForDeployment();
   const revocationRegistryAddress = await revocationRegistry.getAddress();
   console.log(`✔ RevocationRegistry deployed at: ${revocationRegistryAddress}`);
@@ -59,7 +65,8 @@ async function main() {
       "Nexo Accredited University (Admin/Deployer)",
       "UGC-NEXO-001",
       0, // University
-      deployer.address
+      deployer.address,
+      overrides
     );
     await tx0.wait();
     console.log(`✔ Registered Deployer (${deployer.address}) as trusted university`);
@@ -71,7 +78,8 @@ async function main() {
       "Indian Institute of Technology Bombay (IIT Bombay)",
       "UGC-ENG-001",
       0, // University
-      demoUniv
+      demoUniv,
+      overrides
     );
     await tx1.wait();
     console.log(`✔ Registered IIT Bombay (${demoUniv}) as trusted university`);
@@ -83,7 +91,8 @@ async function main() {
       "Tata Consultancy Services Limited (TCS)",
       "CIN-IT-002",
       1, // Employer
-      demoEmployer
+      demoEmployer,
+      overrides
     );
     await tx2.wait();
     console.log(`✔ Registered TCS (${demoEmployer}) as trusted employer`);

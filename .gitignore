@@ -36,3 +36,9 @@ yarn-error.log*
 .vscode
 .idea
 
+
+# Prisma SQLite database (never commit)
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db
+prisma/*.db-journal

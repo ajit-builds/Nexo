@@ -2,16 +2,29 @@ require("@nomicfoundation/hardhat-toolbox");
 const fs = require("fs");
 const path = require("path");
 
-// Load .env and .env.local if present
-try {
-  const dotenv = require("dotenv");
-  if (fs.existsSync(path.join(__dirname, ".env.local"))) {
-    dotenv.config({ path: path.join(__dirname, ".env.local") });
+// Load .env and .env.local without requiring external dotenv package
+function loadEnvFile(filePath) {
+  if (fs.existsSync(filePath)) {
+    const lines = fs.readFileSync(filePath, "utf8").split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx > 0) {
+        const key = trimmed.slice(0, eqIdx).trim();
+        let val = trimmed.slice(eqIdx + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    }
   }
-  dotenv.config();
-} catch (e) {
-  // dotenv optional
 }
+loadEnvFile(path.join(__dirname, ".env.local"));
+loadEnvFile(path.join(__dirname, ".env"));
 
 const AMOY_RPC =
   process.env.ALCHEMY_AMOY_RPC_URL ||
@@ -42,6 +55,7 @@ module.exports = {
       url: AMOY_RPC,
       chainId: 80002,
       accounts: DEPLOYER_KEY,
+      gasPrice: 50000000000,
     },
   },
   etherscan: {
