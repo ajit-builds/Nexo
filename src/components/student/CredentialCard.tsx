@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Check, 
@@ -10,7 +10,8 @@ import {
   Briefcase, 
   GraduationCap,
   Calendar,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import { NexoCredential } from '@/lib/types';
 import { StudentVerifyCard } from '@/components/StudentVerifyCard';
@@ -24,6 +25,16 @@ export function CredentialCard({ credential, onShare }: CredentialCardProps) {
   const [showCertModal, setShowCertModal] = useState(false);
   const isAcademic = credential.type === 'academic';
   const claims = credential.claims;
+
+  // Listen to Escape key to close modal
+  useEffect(() => {
+    if (!showCertModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowCertModal(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showCertModal]);
 
   return (
     <div className="bg-white border border-neutral-200/90 hover:border-neutral-300 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all duration-200 flex flex-col justify-between">
@@ -143,23 +154,28 @@ export function CredentialCard({ credential, onShare }: CredentialCardProps) {
 
       {/* Verified Certificate Modal */}
       {showCertModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="relative max-w-2xl w-full my-8">
-            <div className="p-2">
-              <StudentVerifyCard
-                title={credential.title}
-                recipient={claims.name || claims.full_name || 'Aarav Sharma'}
-                issuer={credential.issuerName}
-                issueDate={credential.issuedAt || 'May 15, 2024'}
-                transactionId={
-                  credential.merkleRoot ||
-                  credential.credentialHash ||
-                  '0xae0789d1a055d1dd765b820a44fcb2d881ef10'
-                }
-                isVerified={true}
-                onReset={() => setShowCertModal(false)}
-              />
-            </div>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-200"
+          onClick={() => setShowCertModal(false)}
+        >
+          <div 
+            className="relative max-w-2xl w-full my-auto z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <StudentVerifyCard
+              title={credential.title}
+              recipient={claims.name || claims.full_name || 'Aarav Sharma'}
+              issuer={credential.issuerName}
+              issueDate={credential.issuedAt || 'May 15, 2024'}
+              transactionId={
+                credential.merkleRoot ||
+                credential.credentialHash ||
+                '0xae0789d1a055d1dd765b820a44fcb2d881ef10'
+              }
+              isVerified={true}
+              onReset={() => setShowCertModal(false)}
+              onClose={() => setShowCertModal(false)}
+            />
           </div>
         </div>
       )}

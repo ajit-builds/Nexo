@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { X, ExternalLink } from 'lucide-react';
 
 interface StudentVerifyCardProps {
   title?: string;
@@ -13,6 +14,7 @@ interface StudentVerifyCardProps {
   isVerified?: boolean;
   onVerify?: () => void;
   onReset?: () => void;
+  onClose?: () => void;
 }
 
 export function StudentVerifyCard({
@@ -26,6 +28,7 @@ export function StudentVerifyCard({
   isVerified = true,
   onVerify,
   onReset,
+  onClose,
 }: StudentVerifyCardProps) {
   // Truncate transaction ID if long
   const displayTx =
@@ -39,10 +42,24 @@ export function StudentVerifyCard({
       ? `https://amoy.polygonscan.com/tx/${transactionId}`
       : `https://amoy.polygonscan.com/`);
 
+  const handleClose = onClose || onReset;
+
   return (
-    <div className="w-full bg-white rounded-2xl shadow-sm border border-slate-200/90 p-8 sm:p-10 font-sans tracking-normal transition-all hover:shadow-md">
+    <div className="relative w-full bg-white rounded-2xl shadow-xl border border-slate-200/90 p-6 sm:p-8 font-sans tracking-normal transition-all max-h-[85vh] overflow-y-auto">
+      {/* Top-Right Single Close Button ("Cut option") */}
+      {handleClose && (
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition z-10 cursor-pointer"
+          title="Close (Esc)"
+          aria-label="Close Certificate Card"
+        >
+          <X className="w-4 h-4 stroke-[2.5]" />
+        </button>
+      )}
+
       {/* Top Row: Logo Badge + Title/Name + VERIFY Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pr-8 sm:pr-10">
         <div className="flex items-center gap-6">
           {/* Multi-colored Circular Cloud Badge matching Blockcerts / Learning Machine reference */}
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
@@ -187,17 +204,6 @@ export function StudentVerifyCard({
         </div>
       </div>
 
-      {/* "Try another certificate" Centered Footer */}
-      {onReset && (
-        <div className="text-center pt-8 mt-2">
-          <button
-            onClick={onReset}
-            className="text-sm text-slate-400 hover:text-slate-600 underline underline-offset-4 font-normal transition"
-          >
-            Try another certificate
-          </button>
-        </div>
-      )}
     </div>
   );
 }
