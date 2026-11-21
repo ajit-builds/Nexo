@@ -5,7 +5,8 @@
   "description": "Tamper-proof digital verifiable credential network for universities, students, and recruiters on Polygon Amoy.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "compile": "hardhat compile",
