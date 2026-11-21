@@ -1,38 +1,69 @@
-import Link from 'next/link';
-import { Building2, UploadCloud, Layers, ArrowLeft } from 'lucide-react';
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { Building2, ArrowLeft, ShieldCheck, ExternalLink, Sparkles } from "lucide-react";
+import { IssuerPortal } from "@/components/IssuerPortal";
 
 export default function UniversityPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mx-auto mb-6">
-        <Building2 className="w-8 h-8" />
-      </div>
-      <span className="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
-        Module 2 • Assigned to @pratikswain070-blip
-      </span>
-      <h1 className="text-3xl font-black text-slate-900 mt-4">University Issuer Portal</h1>
-      <p className="text-slate-600 max-w-lg mx-auto mt-2 text-sm leading-relaxed">
-        Bulk CSV/ERP batch upload, Merkle tree root anchoring on Polygon Amoy, and issuer credential management.
-      </p>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      {/* Sub-header / Navigation */}
+      <div className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 transition"
+            >
+              <ArrowLeft className="w-4 h-4" /> Home
+            </Link>
+            <span className="text-slate-700">/</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-indigo-400" /> University & Employer Issuer Portal
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-indigo-300 bg-indigo-950/80 border border-indigo-700/50 px-2 py-0.5 rounded-full">
+                Module 2 • @pratikswain070-blip
+              </span>
+            </div>
+          </div>
 
-      <div className="mt-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl max-w-md mx-auto text-left">
-        <h4 className="text-xs font-bold text-slate-700 uppercase mb-2">Module 2 Key Tasks:</h4>
-        <ul className="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
-          <li>PapaParse bulk student CSV parsing</li>
-          <li>Merkle Tree construction (`@openzeppelin/merkle-tree`)</li>
-          <li>One-click on-chain batch anchor transaction</li>
-          <li>Revocation management dashboard</li>
-        </ul>
+          <div className="flex items-center gap-3 text-xs">
+            <Link
+              href="/student"
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
+            >
+              🎓 Student Wallet
+            </Link>
+            <Link
+              href="/verify"
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
+            >
+              🔍 Recruiter Verifier
+            </Link>
+            <a
+              href="https://amoy.polygonscan.com"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-950/40 border border-purple-500/30 text-purple-300 hover:bg-purple-900/40 transition"
+            >
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+              Polygon Amoy <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-8">
-        <Link
-          href="/student"
-          className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800"
-        >
-          <ArrowLeft className="w-4 h-4" /> Go to Module 3 (Student Wallet)
-        </Link>
-      </div>
+      {/* Main Issuer Portal */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        <IssuerPortal />
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <p>Nexo Module 2 &bull; Issuer Portal & Batch Issuance Engine &bull; Polygon Amoy & W3C SD-JWT</p>
+      </footer>
     </div>
   );
 }
