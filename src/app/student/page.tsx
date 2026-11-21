@@ -25,6 +25,7 @@ import {
   QrCode,
   RefreshCw
 } from 'lucide-react';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function StudentWalletPage() {
   const [wallet, setWallet] = useState<StoredStudentWallet | null>(null);
@@ -99,7 +100,8 @@ export default function StudentWalletPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <AuthGuard allowedRole="STUDENT">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* 1. Wallet Identity Header */}
       <WalletHeader wallet={wallet} onRefresh={initWallet} />
 
@@ -233,5 +235,6 @@ export default function StudentWalletPage() {
         onConsentLogged={() => setConsentLogs(getConsentLogs())}
       />
     </div>
-  );
+  </AuthGuard>
+);
 }

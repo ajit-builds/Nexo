@@ -519,8 +519,10 @@ function VerifierContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-sm text-slate-500">Loading Verifier...</div>}>
-      <VerifierContent />
-    </Suspense>
+    <AuthGuard allowedRole="RECRUITER">
+      <Suspense fallback={<div className="p-12 text-center text-sm text-slate-500">Loading Verifier...</div>}>
+        <VerifierContent />
+      </Suspense>
+    </AuthGuard>
   );
 }
