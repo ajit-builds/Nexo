@@ -1,8 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
 try {
-  require("dotenv").config();
+  const { loadEnvConfig } = require("@next/env");
+  loadEnvConfig(process.cwd());
 } catch (e) {
-  // dotenv optional in local dev
+  // fallback if @next/env not available
 }
 
 /** @type import('hardhat/config').HardhatUserConfig */
