@@ -27,7 +27,7 @@ import { StudentVerifyCard } from '@/components/StudentVerifyCard';
 function VerifierContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const presentationId = searchParams.get('id');
+  const presentationId = searchParams.get('id') || searchParams.get('uid');
   const rawData = searchParams.get('data');
   const modeParam = searchParams.get('mode') as 'camera' | 'paste' | 'demo' | null;
 
