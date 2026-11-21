@@ -150,15 +150,26 @@ export function CredentialCard({ credential, onShare }: CredentialCardProps) {
             >
               <X className="w-4 h-4" />
             </button>
-            <StudentVerifyCard
-              title={credential.title}
-              recipient={claims.full_name || claims.student_name || 'Aarav Sharma'}
-              issuer={credential.issuerName}
-              issuerUrl="www.nexo-credentials.edu"
-              issueDate={credential.issuedAt}
-              transactionId={credential.merkleRoot}
-              isVerified={true}
-            />
+            <div className="pt-2">
+              <StudentVerifyCard
+                title={credential.title}
+                recipient={
+                  isAcademic
+                    ? (claims as any).full_name || (claims as any).student_name || 'Aarav Sharma'
+                    : (claims as any).employee_name || 'Aarav Sharma'
+                }
+                issuer={credential.issuerName}
+                issuerUrl="www.nexo-credentials.edu"
+                issueDate={credential.issuedAt}
+                transactionId={
+                  credential.merkleRoot ||
+                  credential.credentialHash ||
+                  '0xae0789d1a055d1dd765b820a44fcb2d881ef10'
+                }
+                isVerified={true}
+                onReset={() => setShowCertModal(false)}
+              />
+            </div>
           </div>
         </div>
       )}
