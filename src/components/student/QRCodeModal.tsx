@@ -24,13 +24,18 @@ interface QRCodeModalProps {
 
 export function QRCodeModal({ payload, isOpen, onClose, onConsentLogged }: QRCodeModalProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [verificationUrl, setVerificationUrl] = useState<string>('');
+  const [copiedLink, setCopiedLink] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showJson, setShowJson] = useState(false);
 
   useEffect(() => {
     if (payload && isOpen) {
       generatePresentationQRCode(payload)
-        .then((url) => setQrDataUrl(url))
+        .then((res) => {
+          setQrDataUrl(res.dataUrl);
+          setVerificationUrl(res.verificationUrl);
+        })
         .catch((err) => console.error('Failed to generate QR:', err));
 
       // Auto-save to DPDP consent log
@@ -51,6 +56,13 @@ export function QRCodeModal({ payload, isOpen, onClose, onConsentLogged }: QRCod
   }, [payload, isOpen]);
 
   if (!isOpen || !payload) return null;
+
+  const copyLink = () => {
+    if (!verificationUrl) return;
+    navigator.clipboard.writeText(verificationUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   const copyJson = () => {
     navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -124,19 +136,35 @@ export function QRCodeModal({ payload, isOpen, onClose, onConsentLogged }: QRCod
           </div>
 
           {/* Quick action buttons */}
-          <div className="w-full flex items-center gap-3">
+          <div className="w-full grid grid-cols-2 gap-2.5">
+            <button
+              onClick={copyLink}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition shadow-sm"
+            >
+              {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedLink ? 'Copied URL!' : 'Copy Verification URL'}</span>
+            </button>
+            <a
+              href={verificationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition shadow-sm text-center"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Test Verify in New Tab ↗</span>
+            </a>
             <button
               onClick={downloadQR}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl transition"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl transition"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5" />
               <span>Download Image</span>
             </button>
             <button
               onClick={copyJson}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl transition border border-indigo-200"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition border border-slate-200"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <FileText className="w-3.5 h-3.5" />}
               <span>{copied ? 'Copied Token' : 'Copy JSON Token'}</span>
             </button>
           </div>

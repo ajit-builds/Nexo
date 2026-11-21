@@ -13,7 +13,6 @@ import {
   ConsentLogEntry 
 } from '@/lib/types';
 import { getOrCreateStudentWallet } from '@/lib/wallet';
-import { getStudentCredentials } from '@/lib/mock-credentials';
 import { getConsentLogs } from '@/lib/sd-jwt-helper';
 import { 
   GraduationCap, 
@@ -21,19 +20,42 @@ import {
   Layers, 
   ShieldCheck, 
   Sparkles, 
-  HelpCircle 
+  UserCheck,
+  RefreshCw
 } from 'lucide-react';
 
 export default function StudentWalletPage() {
   const [wallet, setWallet] = useState<StoredStudentWallet | null>(null);
   const [privateKey, setPrivateKey] = useState<string>('');
   const [credentials, setCredentials] = useState<NexoCredential[]>([]);
+  const [availableStudents, setAvailableStudents] = useState<any[]>([]);
+  const [activeStudentId, setActiveStudentId] = useState<string>('IITB-2024-001');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [consentLogs, setConsentLogs] = useState<ConsentLogEntry[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'academic' | 'experience'>('all');
 
   // Modals
   const [selectedForShare, setSelectedForShare] = useState<NexoCredential | null>(null);
   const [presentationPayload, setPresentationPayload] = useState<VerificationPresentationPayload | null>(null);
+
+  // Fetch real credentials from API
+  const fetchCredentialsFromApi = async (studentId: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/credentials?studentId=${studentId}`);
+      const data = await res.json();
+      if (data.success) {
+        setCredentials(data.credentials);
+        if (data.availableStudents) {
+          setAvailableStudents(data.availableStudents);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch credentials from API:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const initWallet = async () => {
     try {
@@ -43,13 +65,18 @@ export default function StudentWalletPage() {
     } catch (e) {
       console.error('Wallet initialization error:', e);
     }
-    setCredentials(getStudentCredentials());
+    await fetchCredentialsFromApi(activeStudentId);
     setConsentLogs(getConsentLogs());
   };
 
   useEffect(() => {
     initWallet();
   }, []);
+
+  const handleStudentSwitch = (newId: string) => {
+    setActiveStudentId(newId);
+    fetchCredentialsFromApi(newId);
+  };
 
   const filteredCredentials = credentials.filter((c) => {
     if (activeTab === 'academic') return c.type === 'academic';
@@ -68,7 +95,7 @@ export default function StudentWalletPage() {
       <WalletHeader wallet={wallet} onRefresh={initWallet} />
 
       {/* 2. Portfolio Section Header & Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             My Credential Portfolio
@@ -117,6 +144,30 @@ export default function StudentWalletPage() {
           </button>
         </div>
       </div>
+
+      {/* 2.1 Live ERP/CSV API Student Profile Selector */}
+      {availableStudents.length > 0 && (
+        <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+            <span className="text-xs font-bold text-slate-700">Live API Profile (from ERP Batch):</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={activeStudentId}
+              onChange={(e) => handleStudentSwitch(e.target.value)}
+              className="text-xs font-medium bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {availableStudents.map((s) => (
+                <option key={s.studentId} value={s.studentId}>
+                  {s.name} ({s.studentId}) • CGPA: {s.cgpa} {s.cgpa_above_8 ? '✓ [CGPA ≥ 8]' : '✗ [CGPA < 8]'}
+                </option>
+              ))}
+            </select>
+            {isLoading && <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin" />}
+          </div>
+        </div>
+      )}
 
       {/* 3. Credentials Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">

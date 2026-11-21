@@ -200,11 +200,30 @@ export async function createSelectivePresentation(
 }
 
 /**
- * Generate QR code data URL (PNG) from presentation payload
+ * Generate QR code data URL (PNG) from presentation payload.
+ * Encodes a direct verification URL so phone cameras and verifier scanners work instantly!
  */
-export async function generatePresentationQRCode(payload: VerificationPresentationPayload): Promise<string> {
-  const compactPayload = JSON.stringify(payload);
-  return await QRCode.toDataURL(compactPayload, {
+export async function generatePresentationQRCode(payload: VerificationPresentationPayload): Promise<{ dataUrl: string; verificationUrl: string }> {
+  // First persist presentation via API endpoint
+  let verificationUrl = '';
+  if (typeof window !== 'undefined') {
+    const origin = window.location.origin;
+    // Embed compressed/safe base64 data for 100% offline support
+    const encodedPayload = encodeURIComponent(JSON.stringify(payload));
+    verificationUrl = `${origin}/verify?id=${payload.presentationId}&data=${encodedPayload}`;
+
+    // Also fire background POST to /api/presentation
+    fetch('/api/presentation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch((err) => console.warn('Presentation API cache notice:', err));
+  } else {
+    verificationUrl = `http://localhost:3000/verify?id=${payload.presentationId}`;
+  }
+
+  // Generate QR code encoding the direct clickable Verification URL
+  const dataUrl = await QRCode.toDataURL(verificationUrl, {
     errorCorrectionLevel: 'M',
     margin: 2,
     scale: 6,
@@ -213,6 +232,8 @@ export async function generatePresentationQRCode(payload: VerificationPresentati
       light: '#ffffff',
     },
   });
+
+  return { dataUrl, verificationUrl };
 }
 
 const CONSENT_STORAGE_KEY = 'nexo_consent_logs';
