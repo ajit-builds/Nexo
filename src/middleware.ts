@@ -7,17 +7,17 @@ import { verifySessionToken, AUTH_COOKIE_NAME } from '@/lib/session';
  * Rules:
  * - /university, /issuer: ONLY role 'issuer'
  * - /student, /student-wallet, /api/student: ONLY role 'student'
- * - /verify, /reviewer: ONLY role 'reviewer'
+ * - /verify, /reviewer, /recruiter: ONLY role 'reviewer'
  *
  * Direct URL access to unauthorized portals is blocked with 403 / redirect to /unauthorized.
- * Unauthorized API access returns JSON 403.
+ * Preserves redirect target with query parameters on unauthenticated requests.
  */
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const { pathname, search } = req.nextUrl;
 
   const isIssuerPath = pathname.startsWith('/university') || pathname.startsWith('/issuer');
   const isStudentPath = pathname.startsWith('/student') || pathname.startsWith('/student-wallet');
-  const isReviewerPath = pathname.startsWith('/verify') || pathname.startsWith('/reviewer');
+  const isReviewerPath = pathname.startsWith('/verify') || pathname.startsWith('/reviewer') || pathname.startsWith('/recruiter');
   const isStudentApiPath = pathname.startsWith('/api/student');
 
   // If not a protected portal or API path, let it pass
@@ -52,7 +52,8 @@ export function middleware(req: NextRequest) {
   // 2. Unauthenticated user attempting to access protected portal
   if (!session) {
     const loginUrl = new URL('/login', req.url);
-    loginUrl.searchParams.set('redirect', pathname);
+    // Preserve full target path with query params (e.g. ?id=... or ?uid=...)
+    loginUrl.searchParams.set('redirect', `${pathname}${search}`);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -97,9 +98,9 @@ export function middleware(req: NextRequest) {
       unauthUrl.searchParams.set('authorizedPortal', portalPath);
       return NextResponse.redirect(unauthUrl);
     }
-    // Handle alias /reviewer -> redirect to canonical /verify
+    // Handle alias /reviewer -> redirect to canonical /verify (preserving search params)
     if (pathname.startsWith('/reviewer')) {
-      return NextResponse.redirect(new URL('/verify', req.url));
+      return NextResponse.redirect(new URL(`/verify${search}`, req.url));
     }
     return NextResponse.next();
   }
@@ -115,6 +116,7 @@ export const config = {
     '/student-wallet/:path*',
     '/verify/:path*',
     '/reviewer/:path*',
+    '/recruiter/:path*',
     '/api/student/:path*',
   ],
 };

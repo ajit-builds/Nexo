@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { StoredStudentWallet } from './types';
 
+export const DEFAULT_WALLET_PIN = '1234';
 const WALLET_STORAGE_KEY = 'nexo_student_wallet';
 const WALLET_SESSION_KEY = 'nexo_student_active_key';
 
@@ -40,7 +41,7 @@ function toHex(bytes: Uint8Array): string {
 function fromHex(hex: string): Uint8Array {
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+    bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
   }
   return bytes;
 }
@@ -48,7 +49,10 @@ function fromHex(hex: string): Uint8Array {
 /**
  * Encrypt private key with user PIN using AES-GCM
  */
-export async function encryptPrivateKey(privateKey: string, pin: string = '0000'): Promise<{ cipherHex: string; saltHex: string; ivHex: string }> {
+export async function encryptPrivateKey(
+  privateKey: string,
+  pin: string = DEFAULT_WALLET_PIN
+): Promise<{ cipherHex: string; saltHex: string; ivHex: string }> {
   try {
     if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
       const enc = new TextEncoder();
@@ -69,23 +73,32 @@ export async function encryptPrivateKey(privateKey: string, pin: string = '0000'
       };
     }
   } catch (err) {
-    console.warn('Subtle crypto error, falling back to simple encoding:', err);
+    console.warn('WebCrypto AES-GCM encryption unavailable:', err);
   }
 
-  // Graceful fallback if subtle crypto is disabled in browser sandbox
+  // Obfuscated fallback for test environments without window.crypto.subtle
+  const enc = new TextEncoder();
+  const xorBytes = enc.encode(privateKey).map((b, i) => b ^ pin.charCodeAt(i % pin.length));
   return {
-    cipherHex: toHex(new TextEncoder().encode(privateKey)),
-    saltHex: 'fallback',
-    ivHex: 'fallback',
+    cipherHex: toHex(xorBytes),
+    saltHex: 'fallback_pin_xor',
+    ivHex: 'fallback_pin_xor',
   };
 }
 
 /**
  * Decrypt private key with user PIN
  */
-export async function decryptPrivateKey(cipherHex: string, saltHex: string, ivHex: string, pin: string = '0000'): Promise<string> {
-  if (saltHex === 'fallback') {
-    return new TextDecoder().decode(fromHex(cipherHex));
+export async function decryptPrivateKey(
+  cipherHex: string,
+  saltHex: string,
+  ivHex: string,
+  pin: string = DEFAULT_WALLET_PIN
+): Promise<string> {
+  if (saltHex === 'fallback_pin_xor' || saltHex === 'fallback') {
+    const cipherBytes = fromHex(cipherHex);
+    const decrypted = cipherBytes.map((b, i) => b ^ pin.charCodeAt(i % pin.length));
+    return new TextDecoder().decode(decrypted);
   }
   try {
     const dec = new TextDecoder();
@@ -102,7 +115,8 @@ export async function decryptPrivateKey(cipherHex: string, saltHex: string, ivHe
 
     return dec.decode(decryptedBuffer);
   } catch {
-    return new TextDecoder().decode(fromHex(cipherHex));
+    // Return empty on decryption failure to indicate wrong PIN
+    return '';
   }
 }
 
@@ -110,7 +124,9 @@ export async function decryptPrivateKey(cipherHex: string, saltHex: string, ivHe
  * Get or automatically create the student in-app wallet on device.
  * No MetaMask required. Zero friction.
  */
-export async function getOrCreateStudentWallet(defaultPin: string = '1234'): Promise<{ walletData: StoredStudentWallet; decryptedPrivateKey: string; isNew: boolean }> {
+export async function getOrCreateStudentWallet(
+  defaultPin: string = DEFAULT_WALLET_PIN
+): Promise<{ walletData: StoredStudentWallet; decryptedPrivateKey: string; isNew: boolean }> {
   if (typeof window === 'undefined') {
     return {
       walletData: { address: '', encryptedPrivateKey: '', salt: '', createdAt: '', isPinProtected: false },
@@ -134,8 +150,10 @@ export async function getOrCreateStudentWallet(defaultPin: string = '1234'): Pro
       if (stored.ivHex && stored.salt) {
         try {
           const privateKey = await decryptPrivateKey(stored.encryptedPrivateKey, stored.salt, stored.ivHex, defaultPin);
-          sessionStorage.setItem(WALLET_SESSION_KEY, privateKey);
-          return { walletData: stored, decryptedPrivateKey: privateKey, isNew: false };
+          if (privateKey) {
+            sessionStorage.setItem(WALLET_SESSION_KEY, privateKey);
+            return { walletData: stored, decryptedPrivateKey: privateKey, isNew: false };
+          }
         } catch {
           // Locked with custom pin
           return { walletData: stored, decryptedPrivateKey: '', isNew: false };
@@ -178,6 +196,20 @@ export async function signStudentPresentation(privateKey: string, messageHashOrO
   } catch (error) {
     console.error('Failed to sign presentation:', error);
     throw error;
+  }
+}
+
+/**
+ * Cryptographically verify an ECDSA signature against the signer's public address
+ */
+export function verifyStudentSignature(address: string, message: any, signature: string): boolean {
+  try {
+    if (!address || !signature) return false;
+    const text = typeof message === 'string' ? message : JSON.stringify(message);
+    const recovered = ethers.verifyMessage(text, signature);
+    return recovered.toLowerCase() === address.toLowerCase();
+  } catch {
+    return false;
   }
 }
 

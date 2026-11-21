@@ -23,6 +23,7 @@ import { VerificationPresentationPayload } from '@/lib/types';
 import { QRScanner } from '@/components/QRScanner';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { StudentVerifyCard } from '@/components/StudentVerifyCard';
+import { verifyPresentationSignature } from '@/lib/sd-jwt-helper';
 
 function VerifierContent() {
   const router = useRouter();
@@ -216,6 +217,7 @@ function VerifierContent() {
   };
 
   const isExpired = presentation ? new Date(presentation.expiresAt).getTime() < Date.now() : false;
+  const sigVerification = presentation ? verifyPresentationSignature(presentation) : null;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
@@ -452,7 +454,7 @@ function VerifierContent() {
             </div>
 
             {/* Cryptographic Pipeline Checks */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-black/[0.04]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6 pt-6 border-t border-black/[0.04]">
               <div className="flex items-center gap-2.5 p-3 bg-white rounded-2xl border border-black/[0.04] shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-[#34c759] flex-shrink-0" />
                 <div className="text-[11px] leading-tight">
@@ -474,6 +476,24 @@ function VerifierContent() {
                 <div className="text-[11px] leading-tight">
                   <span className="font-semibold text-[#1d1d1f] block">Revocation Check</span>
                   <span className="text-[#86868b]">Active & Not Revoked</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 p-3 bg-white rounded-2xl border border-black/[0.04] shadow-xs">
+                {sigVerification?.valid || !presentation.holderSignature ? (
+                  <CheckCircle2 className="w-4 h-4 text-[#34c759] flex-shrink-0" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-[#ff3b30] flex-shrink-0" />
+                )}
+                <div className="text-[11px] leading-tight">
+                  <span className="font-semibold text-[#1d1d1f] block">Holder Signature</span>
+                  <span className="text-[#86868b] truncate max-w-[120px]">
+                    {presentation.holderSignature
+                      ? sigVerification?.valid
+                        ? 'ECDSA Verified'
+                        : 'Invalid Signature'
+                      : 'Self-Sovereign Pass'}
+                  </span>
                 </div>
               </div>
             </div>

@@ -200,6 +200,55 @@ export async function createSelectivePresentation(
 }
 
 /**
+ * Verify cryptographic holder signature on a selective disclosure presentation
+ */
+export function verifyPresentationSignature(payload: VerificationPresentationPayload): {
+  valid: boolean;
+  recoveredAddress?: string;
+  isExpired: boolean;
+  reason: string;
+} {
+  const isExpired = new Date(payload.expiresAt).getTime() < Date.now();
+  if (isExpired) {
+    return { valid: false, isExpired: true, reason: 'Presentation expired' };
+  }
+
+  if (!payload.holderSignature) {
+    return {
+      valid: false,
+      isExpired: false,
+      reason: 'No cryptographic holder signature attached',
+    };
+  }
+
+  try {
+    // Reconstruct unsigned payload for digest verification
+    const { holderSignature, ...unsignedPayload } = payload;
+    const digest = ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(unsignedPayload)));
+    const recovered = ethers.verifyMessage(ethers.getBytes(digest), holderSignature);
+
+    const matches =
+      Boolean(payload.holderAddress) &&
+      recovered.toLowerCase() === payload.holderAddress.toLowerCase();
+
+    return {
+      valid: matches,
+      recoveredAddress: recovered,
+      isExpired: false,
+      reason: matches
+        ? `Valid signature from ${recovered.slice(0, 6)}...${recovered.slice(-4)}`
+        : `Signature address mismatch (recovered ${recovered.slice(0, 6)}... vs holder ${payload.holderAddress?.slice(0, 6)}...)`,
+    };
+  } catch (err: any) {
+    return {
+      valid: false,
+      isExpired: false,
+      reason: `Signature verification failed: ${err.message}`,
+    };
+  }
+}
+
+/**
  * Generate QR code data URL (PNG) from presentation payload.
  * Encodes a direct verification URL so phone cameras and verifier scanners work instantly!
  */

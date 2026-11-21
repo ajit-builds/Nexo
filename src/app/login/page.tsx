@@ -37,6 +37,7 @@ function LoginForm() {
   const { login, register, quickLoginPreset } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect");
 
   // Real-time domain validation as user types
   const domainValidation = useMemo(() => {
@@ -65,6 +66,13 @@ function LoginForm() {
     setSubmitting(true);
 
     try {
+      const computeTarget = (res: { portalPath?: string; role?: AppRole }) => {
+        if (redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')) {
+          return redirectTarget;
+        }
+        return res.portalPath || ROLE_PORTALS[res.role || "student"].canonical;
+      };
+
       if (mode === "login") {
         const result = await login(email, password);
         if (!result.success) {
@@ -72,8 +80,7 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        const target = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
-        router.push(target);
+        router.push(computeTarget(result));
       } else {
         const result = await register(email, password, name);
         if (!result.success) {
@@ -81,8 +88,7 @@ function LoginForm() {
           setSubmitting(false);
           return;
         }
-        const target = result.portalPath || ROLE_PORTALS[result.role || "student"].canonical;
-        router.push(target);
+        router.push(computeTarget(result));
       }
     } catch (err: any) {
       setErrorMessage(err.message || "An unexpected error occurred.");
@@ -98,6 +104,8 @@ function LoginForm() {
       if (!result.success) {
         setErrorMessage(result.error || "Preset login failed.");
         setSubmitting(false);
+      } else if (redirectTarget && redirectTarget.startsWith('/') && !redirectTarget.startsWith('//')) {
+        router.push(redirectTarget);
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Preset login failed.");
