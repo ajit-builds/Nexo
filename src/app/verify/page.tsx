@@ -24,6 +24,7 @@ import {
 import { VerificationPresentationPayload } from '@/lib/types';
 import { QRScanner } from '@/components/QRScanner';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { StudentVerifyCard } from '@/components/StudentVerifyCard';
 
 function VerifierContent() {
   const router = useRouter();
@@ -365,6 +366,42 @@ function VerifierContent() {
       {/* Verified Result Banner & Breakdown */}
       {presentation && !loading && (
         <div className="space-y-6 animate-fadeIn">
+          {/* Reference Certificate Verify Card matching Blockcerts format */}
+          <StudentVerifyCard
+            title={
+              (presentation.disclosedClaims as any)?.degree ||
+              (presentation.disclosedClaims as any)?.role ||
+              (presentation.credentialType === 'academic'
+                ? 'Bachelor of Technology in Computer Science'
+                : 'Certified Work Experience Letter')
+            }
+            recipient={
+              (presentation.disclosedClaims as any)?.name ||
+              (presentation.disclosedClaims as any)?.student_name ||
+              'Aarav Sharma'
+            }
+            issuer={presentation.issuerName || 'Northern University'}
+            issuerUrl="www.nexo-credentials.edu"
+            issueDate={
+              presentation.issuedAt
+                ? new Date(presentation.issuedAt).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'November 10, 2024'
+            }
+            transactionId={
+              presentation.merkleRoot ||
+              '0xae0789d1a055d1dd765b820a44fcb2d881ef10'
+            }
+            isVerified={!isExpired}
+            onReset={() => {
+              setPresentation(null);
+              router.push('/verify');
+            }}
+          />
+
           {/* Main Status Card */}
           <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm ${
             isExpired
