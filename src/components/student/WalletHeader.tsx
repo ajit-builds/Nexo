@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Wallet, ShieldCheck, Copy, Check, RefreshCw, KeyRound, Sparkles } from 'lucide-react';
 import { StoredStudentWallet } from '@/lib/types';
 import { resetStudentWallet } from '@/lib/wallet';
+import { copyToClipboard } from '@/lib/clipboard';
 
 interface WalletHeaderProps {
   wallet: StoredStudentWallet | null;
@@ -13,11 +14,13 @@ interface WalletHeaderProps {
 export function WalletHeader({ wallet, onRefresh }: WalletHeaderProps) {
   const [copied, setCopied] = useState(false);
 
-  const copyAddress = () => {
+  const copyAddress = async () => {
     if (!wallet?.address) return;
-    navigator.clipboard.writeText(wallet.address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(wallet.address);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const handleReset = () => {

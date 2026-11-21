@@ -9,6 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password?: string, roleOverride?: UserRole) => UserRole;
   register: (email: string, name: string, role: UserRole, organization?: string) => void;
+  updateUserProfile: (updates: Partial<AuthUser>) => void;
   logout: () => void;
   quickLoginPreset: (role: UserRole) => void;
 }
@@ -66,6 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
   };
 
+  const updateUserProfile = (updates: Partial<AuthUser>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated: AuthUser = { ...prev, ...updates };
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -83,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, quickLoginPreset }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, updateUserProfile, logout, quickLoginPreset }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Database, CheckCircle2, Copy, Download, ExternalLink, ChevronDown, ChevronUp, Key } from "lucide-react";
 import { BatchRecord, SDJWTCredential } from "@/types";
+import { copyToClipboard } from "@/lib/clipboard";
 
 interface Props {
   batches: BatchRecord[];
@@ -17,10 +18,12 @@ export function BatchHistory({ batches }: Props) {
     setExpandedBatchId(expandedBatchId === id ? null : id);
   };
 
-  const copyToken = (token: string) => {
-    navigator.clipboard.writeText(token);
-    setCopiedToken(true);
-    setTimeout(() => setCopiedToken(false), 2000);
+  const copyToken = async (token: string) => {
+    const ok = await copyToClipboard(token);
+    if (ok) {
+      setCopiedToken(true);
+      setTimeout(() => setCopiedToken(false), 2000);
+    }
   };
 
   const downloadBatchJson = (batch: BatchRecord) => {

@@ -26,8 +26,10 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { useAuth } from '@/context/AuthContext';
 
 export default function StudentWalletPage() {
+  const { user, updateUserProfile } = useAuth();
   const [wallet, setWallet] = useState<StoredStudentWallet | null>(null);
   const [privateKey, setPrivateKey] = useState<string>('');
   const [credentials, setCredentials] = useState<NexoCredential[]>(INITIAL_MOCK_CREDENTIALS);
@@ -52,6 +54,14 @@ export default function StudentWalletPage() {
           setCredentials(data.credentials);
           if (data.availableStudents) {
             setAvailableStudents(data.availableStudents);
+            const current = data.availableStudents.find((s: any) => s.studentId === studentId);
+            if (current && updateUserProfile) {
+              updateUserProfile({
+                name: current.name,
+                organization: `IIT Bombay (${current.studentId})`,
+                email: `${current.name.toLowerCase().replace(/\s+/g, '.')}@student.iitb.ac.in`,
+              });
+            }
           }
         }
       }
@@ -85,6 +95,14 @@ export default function StudentWalletPage() {
 
   const handleStudentSwitch = (newId: string) => {
     setActiveStudentId(newId);
+    const target = availableStudents.find((s) => s.studentId === newId);
+    if (target && updateUserProfile) {
+      updateUserProfile({
+        name: target.name,
+        organization: `IIT Bombay (${target.studentId})`,
+        email: `${target.name.toLowerCase().replace(/\s+/g, '.')}@student.iitb.ac.in`,
+      });
+    }
     fetchCredentialsFromApi(newId);
   };
 
