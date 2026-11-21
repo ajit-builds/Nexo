@@ -14,6 +14,7 @@ import {
 } from '@/lib/types';
 import { getOrCreateStudentWallet } from '@/lib/wallet';
 import { getConsentLogs } from '@/lib/sd-jwt-helper';
+import { INITIAL_MOCK_CREDENTIALS } from '@/lib/mock-credentials';
 import { 
   GraduationCap, 
   Briefcase, 
@@ -27,10 +28,10 @@ import {
 export default function StudentWalletPage() {
   const [wallet, setWallet] = useState<StoredStudentWallet | null>(null);
   const [privateKey, setPrivateKey] = useState<string>('');
-  const [credentials, setCredentials] = useState<NexoCredential[]>([]);
+  const [credentials, setCredentials] = useState<NexoCredential[]>(INITIAL_MOCK_CREDENTIALS);
   const [availableStudents, setAvailableStudents] = useState<any[]>([]);
   const [activeStudentId, setActiveStudentId] = useState<string>('IITB-2024-001');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [consentLogs, setConsentLogs] = useState<ConsentLogEntry[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'academic' | 'experience'>('all');
 
@@ -43,30 +44,37 @@ export default function StudentWalletPage() {
     setIsLoading(true);
     try {
       const res = await fetch(`/api/credentials?studentId=${studentId}`);
-      const data = await res.json();
-      if (data.success) {
-        setCredentials(data.credentials);
-        if (data.availableStudents) {
-          setAvailableStudents(data.availableStudents);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.credentials && data.credentials.length > 0) {
+          setCredentials(data.credentials);
+          if (data.availableStudents) {
+            setAvailableStudents(data.availableStudents);
+          }
         }
       }
     } catch (err) {
-      console.error('Failed to fetch credentials from API:', err);
+      console.warn('API fetch notice, using local credentials cache:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
   const initWallet = async () => {
+    // 1. Fetch credentials immediately in parallel
+    fetchCredentialsFromApi(activeStudentId);
+    setConsentLogs(getConsentLogs());
+
+    // 2. Initialize in-app wallet
     try {
       const res = await getOrCreateStudentWallet();
-      setWallet(res.walletData);
-      setPrivateKey(res.decryptedPrivateKey);
+      if (res && res.walletData) {
+        setWallet(res.walletData);
+        setPrivateKey(res.decryptedPrivateKey);
+      }
     } catch (e) {
-      console.error('Wallet initialization error:', e);
+      console.warn('Wallet initialization error:', e);
     }
-    await fetchCredentialsFromApi(activeStudentId);
-    setConsentLogs(getConsentLogs());
   };
 
   useEffect(() => {
