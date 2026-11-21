@@ -11,13 +11,17 @@ import {
   QrCode, 
   LogIn, 
   LogOut, 
-  UserCircle2, 
-  ChevronDown 
+  UserCircle2 
 } from "lucide-react";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+
+  const role = user?.role?.toLowerCase();
+  const isIssuer = role === "issuer";
+  const isStudent = role === "student";
+  const isReviewer = role === "reviewer";
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
@@ -37,24 +41,25 @@ export function Navbar() {
 
         {/* Role-Filtered Navigation */}
         <nav className="flex items-center gap-2">
-          {/* If Logged Out: Show all three with subtle cues */}
+          {/* If Logged Out: Show Link to Sign In */}
           {!user && (
-            <div className="hidden sm:flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Link
                 href="/login"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition"
               >
-                <span>Browse Portals</span>
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Portal Sign In</span>
               </Link>
             </div>
           )}
 
-          {/* When logged in as COLLEGE EMAIL: ONLY Issuer Portal is displayed */}
-          {user?.role === "ISSUER" && (
+          {/* When logged in as UNIVERSITY (ISSUER): ONLY Issuer Portal is displayed */}
+          {isIssuer && (
             <Link
               href="/university"
               className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                pathname.startsWith("/university")
+                pathname.startsWith("/university") || pathname.startsWith("/issuer")
                   ? "bg-blue-600 text-white shadow-sm"
                   : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
               }`}
@@ -64,12 +69,12 @@ export function Navbar() {
             </Link>
           )}
 
-          {/* When logged in as STUDENT EMAIL: ONLY Student Wallet is displayed */}
-          {user?.role === "STUDENT" && (
+          {/* When logged in as STUDENT: ONLY Student Wallet is displayed */}
+          {isStudent && (
             <Link
               href="/student"
               className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                pathname.startsWith("/student")
+                pathname.startsWith("/student") || pathname.startsWith("/student-wallet")
                   ? "bg-indigo-600 text-white shadow-sm"
                   : "bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
               }`}
@@ -79,41 +84,41 @@ export function Navbar() {
             </Link>
           )}
 
-          {/* When logged in as COMPANY EMAIL: ONLY Reviewer Portal is displayed */}
-          {user?.role === "RECRUITER" && (
+          {/* When logged in as COMPANY (REVIEWER): ONLY Reviewer Portal is displayed */}
+          {isReviewer && (
             <Link
               href="/verify"
               className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
-                pathname.startsWith("/verify")
+                pathname.startsWith("/verify") || pathname.startsWith("/reviewer")
                   ? "bg-emerald-600 text-white shadow-sm"
                   : "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
               }`}
             >
               <QrCode className="w-4 h-4" />
-              <span>🔍 Recruiter Verifier</span>
+              <span>🔍 Company Reviewer Portal</span>
             </Link>
           )}
 
           {/* User Profile / Auth State Controls */}
-          {user ? (
+          {user && (
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="hidden md:flex flex-col text-right">
                 <span className="text-xs font-bold text-slate-900 leading-tight flex items-center justify-end gap-1">
                   <span>{user.name}</span>
                 </span>
-                <span className="text-[10px] text-slate-500 truncate max-w-[140px]">
-                  {user.organization}
+                <span className="text-[10px] text-slate-500 truncate max-w-[150px]">
+                  {user.email}
                 </span>
               </div>
 
-              <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                user.role === "ISSUER"
+              <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                isIssuer
                   ? "bg-blue-100 text-blue-800 border border-blue-200"
-                  : user.role === "STUDENT"
+                  : isStudent
                   ? "bg-indigo-100 text-indigo-800 border border-indigo-200"
                   : "bg-emerald-100 text-emerald-800 border border-emerald-200"
               }`}>
-                {user.role}
+                {isIssuer ? "University" : isStudent ? "Student" : "Reviewer"}
               </div>
 
               <button
@@ -124,14 +129,6 @@ export function Navbar() {
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
-          ) : (
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-sm ml-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
-            </Link>
           )}
         </nav>
       </div>
