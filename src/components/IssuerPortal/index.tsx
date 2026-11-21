@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Upload, Database, ShieldAlert, BarChart3 } from "lucide-react";
 import { BulkIssuance } from "./BulkIssuance";
 import { BatchHistory } from "./BatchHistory";
@@ -10,7 +11,11 @@ import { loadBatches, loadRevocations } from "@/lib/storage";
 import { BatchRecord, RevocationRecord } from "@/types";
 
 export function IssuerPortal() {
-  const [activeTab, setActiveTab] = useState<"bulk" | "batches" | "revocations" | "analytics">("bulk");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTab = (searchParams.get("tab") as "bulk" | "batches" | "revocations" | "analytics") || "bulk";
+
+  const [activeTab, setActiveTab] = useState<"bulk" | "batches" | "revocations" | "analytics">(currentTab);
   const [batches, setBatches] = useState<BatchRecord[]>([]);
   const [revocations, setRevocations] = useState<RevocationRecord[]>([]);
 
@@ -19,8 +24,20 @@ export function IssuerPortal() {
     setRevocations(loadRevocations());
   }, []);
 
+  useEffect(() => {
+    if (searchParams.get("tab")) {
+      setActiveTab(searchParams.get("tab") as any);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tab: "bulk" | "batches" | "revocations" | "analytics") => {
+    setActiveTab(tab);
+    router.push(`/university?tab=${tab}`, { scroll: false });
+  };
+
   const handleBatchCreated = (newBatch: BatchRecord) => {
     setBatches([newBatch, ...batches]);
+    handleTabChange("batches");
   };
 
   const handleRevocationComplete = (newRevocation: RevocationRecord) => {
@@ -29,50 +46,54 @@ export function IssuerPortal() {
 
   return (
     <div className="space-y-6">
-      {/* Sub Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-gray-800 pb-3">
+      {/* Apple-style Segmented Sub-Navigation Tabs */}
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-white border border-black/[0.06] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         <button
-          onClick={() => setActiveTab("bulk")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          type="button"
+          onClick={() => handleTabChange("bulk")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "bulk"
-              ? "bg-indigo-600 text-white shadow-md"
-              : "bg-gray-800/40 text-gray-400 hover:text-white hover:bg-gray-800"
+              ? "bg-[#1d1d1f] text-white shadow-sm"
+              : "text-[#1d1d1f] hover:bg-[#f5f5f7]"
           }`}
         >
-          <Upload className="w-4 h-4" /> Bulk CSV Issuance
+          <Upload className="w-3.5 h-3.5" /> Bulk CSV Issuance
         </button>
 
         <button
-          onClick={() => setActiveTab("batches")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          type="button"
+          onClick={() => handleTabChange("batches")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "batches"
-              ? "bg-indigo-600 text-white shadow-md"
-              : "bg-gray-800/40 text-gray-400 hover:text-white hover:bg-gray-800"
+              ? "bg-[#1d1d1f] text-white shadow-sm"
+              : "text-[#1d1d1f] hover:bg-[#f5f5f7]"
           }`}
         >
-          <Database className="w-4 h-4" /> Issued Batches ({batches.length})
+          <Database className="w-3.5 h-3.5" /> Issued Batches ({batches.length})
         </button>
 
         <button
-          onClick={() => setActiveTab("revocations")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          type="button"
+          onClick={() => handleTabChange("revocations")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "revocations"
-              ? "bg-red-600 text-white shadow-md"
-              : "bg-gray-800/40 text-gray-400 hover:text-white hover:bg-gray-800"
+              ? "bg-[#ff3b30] text-white shadow-sm"
+              : "text-[#1d1d1f] hover:bg-[#f5f5f7]"
           }`}
         >
-          <ShieldAlert className="w-4 h-4" /> Revocation Registry ({revocations.length})
+          <ShieldAlert className="w-3.5 h-3.5" /> Revocation Registry ({revocations.length})
         </button>
 
         <button
-          onClick={() => setActiveTab("analytics")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          type="button"
+          onClick={() => handleTabChange("analytics")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
             activeTab === "analytics"
-              ? "bg-indigo-600 text-white shadow-md"
-              : "bg-gray-800/40 text-gray-400 hover:text-white hover:bg-gray-800"
+              ? "bg-[#1d1d1f] text-white shadow-sm"
+              : "text-[#1d1d1f] hover:bg-[#f5f5f7]"
           }`}
         >
-          <BarChart3 className="w-4 h-4" /> Issuer Analytics
+          <BarChart3 className="w-3.5 h-3.5" /> Issuer Analytics
         </button>
       </div>
 
