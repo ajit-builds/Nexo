@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "postinstall": "prisma generate",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate && prisma db push && NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
     "compile": "hardhat compile",
